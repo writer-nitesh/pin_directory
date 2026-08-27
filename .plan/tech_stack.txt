@@ -1,0 +1,17 @@
+# Tech Stack
+
+- Nuxt.js
+- nuxt ui https://nuxt.com/modules/ui ( tailwindcss latest v4.0)
+- nuxt/content nuxt-studio https://nuxt.com/modules/content
+- nuxt-llms https://content.nuxt.com/docs/integrations/llms
+- nuxt-icon https://nuxt.com/modules/icon
+- @nuxtjs/seo https://nuxtseo.com/ (nuxt-og-image, sitemap, robots)
+- @nuxt/image https://nuxt.com/modules/image
+
+# SEO Documentation
+
+https://developers.google.com/search/docs
+https://developers.google.com/search/docs/crawling-indexing/url-structure
+https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
+https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
+https://developers.google.com/search/docs/appearance/ranking-systems-guide

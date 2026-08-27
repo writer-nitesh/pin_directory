@@ -1,0 +1,10 @@
+About Data 
+
+# https://www.data.gov.in/resource/all-india-pincode-directory-till-last-month
+
+Granularity: Monthly
+Reference URL of Resource: https://www.indiapost.gov.in/vas/pages/findpincode.aspx 
+Sourced Webservices/APIs: All India Pincode Directory
+Note: Data will be updated on monthly basis.
+Fields:circlename,regionname,divisionname,officename,pincode,officetype,delivery,district,statename,latitude,longitude
+Keywords:NA

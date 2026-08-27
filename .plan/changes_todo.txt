@@ -1,0 +1,8 @@
+- remove Branch Type and Delivery Status
+- is in Post Office Name BO PO SO is okay ??
+- in search states bhi seach ho 
+- quick seaches me  last 4-5 dikha local storage me store kar k pinnia use karna 
+- sab kuch ssr hoga 
+- API public access nhi honge
+- search feature robots use kar skte hai 
+- use GPS kaam nhi kar rha hai 
