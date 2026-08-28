@@ -13,9 +13,9 @@ if (error.value || !data.value) {
   })
 }
 
-const district = computed(() => data.value.district)
-const pincodes = computed(() => data.value.pincodes)
-const offices = computed(() => data.value.offices)
+const district = computed(() => data.value!.district)
+const pincodes = computed(() => data.value!.pincodes)
+const offices = computed(() => data.value!.offices)
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/district/${districtSlug.value}/pincodes`)
