@@ -16,7 +16,21 @@ const { data, status } = await useFetch(() => `/api/search?q=${encodeURIComponen
   watch: [q],
 })
 
-const results = computed(() => data.value?.results || [])
+interface SearchResultItem {
+  type: string
+  title: string
+  subtitle: string
+  path: string
+  pincode?: string
+  district?: string
+  statename?: string
+  officename?: string
+  slug?: string
+  delivery?: string
+  officetype?: string
+}
+
+const results = computed<SearchResultItem[]>(() => (data.value?.results as SearchResultItem[]) || [])
 
 // If exact 6-digit PIN code searched, redirect directly
 watch(q, (newQ) => {

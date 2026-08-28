@@ -3,7 +3,9 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const cityParam = computed(() => String(route.params.city || '').toLowerCase().trim())
 
-const { data, error } = await useFetch(`/api/city/${cityParam.value}`)
+const { data, error } = await useFetch(() => `/api/city/${cityParam.value}`, {
+  key: `city-${cityParam.value}`,
+})
 
 if (error.value || !data.value) {
   throw createError({
@@ -13,19 +15,19 @@ if (error.value || !data.value) {
   })
 }
 
-const cityName = computed(() => data.value.cityName)
-const statename = computed(() => data.value.statename)
-const pincodes = computed(() => data.value.pincodes)
-const offices = computed(() => data.value.offices)
-const deliveryOfficesCount = computed(() => data.value?.deliveryOfficesCount || offices.value.filter((o: any) => o.delivery === 'Delivery').length)
+const cityName = computed(() => data.value?.cityName || '')
+const statename = computed(() => data.value?.statename || '')
+const pincodes = computed(() => data.value?.pincodes || [])
+const offices = computed(() => data.value?.offices || [])
+const deliveryOfficesCount = computed(() => data.value?.deliveryOfficesCount || offices.value?.filter((o: any) => o.delivery === 'Delivery').length || 0)
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/city/${cityParam.value}/pincodes`)
 
 // SEO Meta
-const title = computed(() => `${cityName.value} PIN Code List: All Postal Codes in ${cityName.value}`)
+const title = computed(() => cityName.value ? `${cityName.value} PIN Code List: All Postal Codes in ${cityName.value}` : '')
 const description = computed(
-  () => `Comprehensive list of ${pincodes.value.length} PIN codes and post offices in ${cityName.value}, ${statename.value}. Find postal addresses, delivery post offices, and area PINs.`
+  () => cityName.value ? `Comprehensive list of ${pincodes.value.length} PIN codes and post offices in ${cityName.value}, ${statename.value}. Find postal addresses, delivery post offices, and area PINs.` : ''
 )
 
 useSeoMeta({
@@ -41,17 +43,17 @@ useHead({
 })
 
 // Breadcrumbs
-const breadcrumbs = computed(() => [
+const breadcrumbs = computed(() => cityName.value ? [
   { name: cityName.value, path: `/city/${cityParam.value}/pincodes` },
-])
+] : [])
 
 useSchemaOrg([
   definePlace({
-    name: `${cityName.value} City`,
+    name: computed(() => cityName.value ? `${cityName.value} City` : ''),
     address: {
       '@type': 'PostalAddress',
-      addressLocality: cityName.value,
-      addressRegion: statename.value,
+      addressLocality: computed(() => cityName.value),
+      addressRegion: computed(() => statename.value),
       addressCountry: 'IN',
     },
   }),
@@ -66,7 +68,7 @@ const filteredPincodes = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6 sm:space-y-8">
+  <div v-if="data" class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
@@ -98,7 +100,8 @@ const filteredPincodes = computed(() => {
         </div>
         <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center col-span-2 sm:col-span-1">
           <span class="text-xs text-zinc-500 block">Delivery Post Offices</span>
-          <span class="text-base sm:text-lg font-bold text-emerald-600 font-mono">{{ deliveryOfficesCount }} Available</span>
+          <span class="text-base sm:text-lg font-bold text-emerald-600 font-mono">{{ deliveryOfficesCount }}
+            Available</span>
         </div>
       </div>
     </div>
@@ -112,22 +115,14 @@ const filteredPincodes = computed(() => {
         </div>
 
         <div class="w-full sm:w-64">
-          <input
-            v-model="filterQuery"
-            type="text"
-            placeholder="Filter PIN codes..."
-            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-md border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
+          <input v-model="filterQuery" type="text" placeholder="Filter PIN codes..."
+            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-md border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500" />
         </div>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <NuxtLink
-          v-for="pin in filteredPincodes"
-          :key="pin.pincode"
-          :to="`/pincode/${pin.pincode}`"
-          class="p-3 rounded-md bg-zinc-50 border border-zinc-200 hover:border-sky-400 hover:bg-sky-50 transition text-center group"
-        >
+        <NuxtLink v-for="pin in filteredPincodes" :key="pin.pincode" :to="`/pincode/${pin.pincode}`"
+          class="p-3 rounded-md bg-zinc-50 border border-zinc-200 hover:border-sky-400 hover:bg-sky-50 transition text-center group">
           <div class="text-base font-extrabold font-mono text-zinc-900 group-hover:text-sky-600">
             {{ pin.pincode }}
           </div>
@@ -165,11 +160,10 @@ const filteredPincodes = computed(() => {
                 </NuxtLink>
               </td>
               <td class="py-3 px-4">
-                <span
-                  class="text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
-                  :class="po.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="po.delivery === 'Delivery' ? 'bg-emerald-600' : 'bg-zinc-400'" />
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+                  :class="po.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'">
+                  <span class="w-1.5 h-1.5 rounded-full"
+                    :class="po.delivery === 'Delivery' ? 'bg-emerald-600' : 'bg-zinc-400'" />
                   {{ po.delivery }}
                 </span>
               </td>

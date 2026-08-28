@@ -3,7 +3,9 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const stateSlug = computed(() => String(route.params.state || ''))
 
-const { data, error } = await useFetch(`/api/state/${stateSlug.value}`)
+const { data, error } = await useFetch(() => `/api/state/${stateSlug.value}`, {
+  key: `state-${stateSlug.value}`,
+})
 
 if (error.value || !data.value) {
   throw createError({
@@ -13,17 +15,17 @@ if (error.value || !data.value) {
   })
 }
 
-const state = computed(() => data.value.state)
-const districts = computed(() => data.value.districts)
-const topPincodes = computed(() => data.value.topPincodes)
+const state = computed(() => data.value?.state)
+const districts = computed(() => data.value?.districts || [])
+const topPincodes = computed(() => data.value?.topPincodes || [])
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/state/${stateSlug.value}/pincodes`)
 
 // SEO Meta
-const title = computed(() => `${state.value.statename} PIN Code List - Districts & Postal Codes`)
+const title = computed(() => state.value ? `${state.value.statename} PIN Code List - Districts & Postal Codes` : '')
 const description = computed(
-  () => `Comprehensive list of PIN codes and post offices in ${state.value.statename}. Browse ${state.value.district_count} districts, ${state.value.pincode_count} postal codes, and ${state.value.office_count} post offices.`
+  () => state.value ? `Comprehensive list of PIN codes and post offices in ${state.value.statename}. Browse ${state.value.district_count} districts, ${state.value.pincode_count} postal codes, and ${state.value.office_count} post offices.` : ''
 )
 
 useSeoMeta({
@@ -41,7 +43,7 @@ useHead({
 // Breadcrumbs
 const breadcrumbs = computed(() => [
   { name: 'States', path: '/states' },
-  { name: state.value.statename, path: `/state/${stateSlug.value}/pincodes` },
+  ...(state.value ? [{ name: state.value.statename, path: `/state/${stateSlug.value}/pincodes` }] : []),
 ])
 
 // Filter districts
@@ -54,7 +56,7 @@ const filteredDistricts = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6 sm:space-y-8">
+  <div v-if="state" class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />

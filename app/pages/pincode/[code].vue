@@ -4,7 +4,9 @@ const config = useRuntimeConfig()
 const code = computed(() => String(route.params.code || ''))
 
 // Fetch PIN Code details from Nitro API
-const { data, error } = await useFetch(`/api/pincode/${code.value}`)
+const { data, error } = await useFetch(() => `/api/pincode/${code.value}`, {
+  key: `pincode-${code.value}`,
+})
 
 if (error.value || !data.value) {
   throw createError({
@@ -14,17 +16,17 @@ if (error.value || !data.value) {
   })
 }
 
-const summary = computed(() => data.value.summary)
-const offices = computed(() => data.value.offices)
-const nearby = computed(() => data.value.nearby)
+const summary = computed(() => data.value?.summary)
+const offices = computed(() => data.value?.offices || [])
+const nearby = computed(() => data.value?.nearby || [])
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/pincode/${code.value}`)
 
 // SEO Meta Tags
-const pageTitle = computed(() => `${code.value} PIN Code: Address, Post Offices & ${summary.value.district} Details`)
+const pageTitle = computed(() => summary.value ? `${code.value} PIN Code: Address, Post Offices & ${summary.value.district} Details` : '')
 const pageDescription = computed(
-  () => `Get PIN code ${code.value} address details in ${summary.value.district}, ${summary.value.statename}. View all ${offices.value.length} post offices, delivery status, and nearby PIN codes.`
+  () => summary.value ? `Get PIN code ${code.value} address details in ${summary.value.district}, ${summary.value.statename}. View all ${offices.value.length} post offices, delivery status, and nearby PIN codes.` : ''
 )
 
 useSeoMeta({
@@ -43,11 +45,11 @@ useHead({
 })
 
 // Breadcrumbs
-const breadcrumbs = computed(() => [
+const breadcrumbs = computed(() => summary.value ? [
   { name: summary.value.statename, path: `/state/${summary.value.state_slug}/pincodes` },
   { name: summary.value.district, path: `/district/${summary.value.district_slug}/pincodes` },
   { name: code.value, path: `/pincode/${code.value}` },
-])
+] : [])
 
 // Structured Data / Schema Markup: Place & PostalAddress
 useSchemaOrg([
@@ -56,17 +58,17 @@ useSchemaOrg([
     address: {
       '@type': 'PostalAddress',
       postalCode: code.value,
-      addressLocality: summary.value.district,
-      addressRegion: summary.value.statename,
+      addressLocality: computed(() => summary.value?.district || ''),
+      addressRegion: computed(() => summary.value?.statename || ''),
       addressCountry: 'IN',
     },
-    geo: summary.value.latitude && summary.value.longitude
+    geo: computed(() => summary.value?.latitude && summary.value?.longitude
       ? {
           '@type': 'GeoCoordinates',
           latitude: summary.value.latitude,
           longitude: summary.value.longitude,
         }
-      : undefined,
+      : undefined),
   }),
 ])
 
@@ -85,7 +87,7 @@ const copyPin = async () => {
 }
 
 // Data-backed FAQs for this exact entity
-const faqs = computed(() => [
+const faqs = computed(() => summary.value ? [
   {
     question: `What is the postal address and location for PIN code ${code.value}?`,
     answer: `PIN code ${code.value} is located in ${summary.value.district} district, ${summary.value.statename}, India. It falls under the ${summary.value.circle || summary.value.statename} postal circle and ${summary.value.division || summary.value.district} postal division.`,
@@ -102,11 +104,11 @@ const faqs = computed(() => [
     question: `Which district and state does PIN ${code.value} belong to?`,
     answer: `${code.value} belongs to ${summary.value.district} district in the state of ${summary.value.statename}, India.`,
   },
-])
+] : [])
 </script>
 
 <template>
-  <div class="space-y-6 sm:space-y-8">
+  <div v-if="summary" class="space-y-6 sm:space-y-8">
     <!-- Breadcrumb Navigation with Schema.org -->
     <BreadcrumbNav :items="breadcrumbs" />
 

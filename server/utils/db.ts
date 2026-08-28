@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3'
-import { resolve } from 'pathe'
+import { resolve } from 'node:path'
 
 let dbInstance: Database.Database | null = null
 

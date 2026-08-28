@@ -21,10 +21,10 @@ if (error.value || !page.value) {
 const canonicalUrl = computed(() => `${config.public.siteUrl}/guides/${slug.value}`)
 
 useSeoMeta({
-  title: `${page.value.title} - Pin Directory`,
-  ogTitle: `${page.value.title} - Pin Directory`,
-  description: page.value.description,
-  ogDescription: page.value.description,
+  title: computed(() => page.value ? `${page.value.title} - Pin Directory` : 'Pin Directory'),
+  ogTitle: computed(() => page.value ? `${page.value.title} - Pin Directory` : 'Pin Directory'),
+  description: computed(() => page.value?.description || ''),
+  ogDescription: computed(() => page.value?.description || ''),
   ogType: 'article',
 })
 
@@ -39,14 +39,14 @@ const breadcrumbs = computed(() => [
 
 useSchemaOrg([
   defineArticle({
-    headline: page.value.title,
-    description: page.value.description,
+    headline: page.value?.title || '',
+    description: page.value?.description || '',
   }),
 ])
 </script>
 
 <template>
-  <div class="space-y-6 sm:space-y-8">
+  <div v-if="page" class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
@@ -85,7 +85,7 @@ useSchemaOrg([
 
       <!-- Minimal Prose Content -->
       <div class="prose prose-zinc sm:prose-lg max-w-none text-zinc-800 leading-relaxed space-y-6">
-        <ContentRenderer :value="page" />
+        <ContentRenderer v-if="page" :value="(page as any)" />
       </div>
 
       <!-- Post-Article Actions -->

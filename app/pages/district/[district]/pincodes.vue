@@ -3,7 +3,9 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const districtSlug = computed(() => String(route.params.district || ''))
 
-const { data, error } = await useFetch(`/api/district/${districtSlug.value}`)
+const { data, error } = await useFetch(() => `/api/district/${districtSlug.value}`, {
+  key: `district-${districtSlug.value}`,
+})
 
 if (error.value || !data.value) {
   throw createError({
@@ -13,17 +15,17 @@ if (error.value || !data.value) {
   })
 }
 
-const district = computed(() => data.value!.district)
-const pincodes = computed(() => data.value!.pincodes)
-const offices = computed(() => data.value!.offices)
+const district = computed(() => data.value?.district)
+const pincodes = computed(() => data.value?.pincodes || [])
+const offices = computed(() => data.value?.offices || [])
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/district/${districtSlug.value}/pincodes`)
 
 // SEO Meta
-const title = computed(() => `${district.value.district} District PIN Codes: Postal Codes & Post Offices`)
+const title = computed(() => district.value ? `${district.value.district} District PIN Codes: Postal Codes & Post Offices` : '')
 const description = computed(
-  () => `All PIN codes and post offices in ${district.value.district} district, ${district.value.statename}. View ${pincodes.value.length} PIN codes and delivery post offices.`
+  () => district.value ? `All PIN codes and post offices in ${district.value.district} district, ${district.value.statename}. View ${pincodes.value.length} PIN codes and delivery post offices.` : ''
 )
 
 useSeoMeta({
@@ -39,18 +41,18 @@ useHead({
 })
 
 // Breadcrumbs
-const breadcrumbs = computed(() => [
+const breadcrumbs = computed(() => district.value ? [
   { name: district.value.statename, path: `/state/${district.value.state_slug}/pincodes` },
   { name: district.value.district, path: `/district/${districtSlug.value}/pincodes` },
-])
+] : [])
 
 useSchemaOrg([
   definePlace({
-    name: `${district.value.district} District`,
+    name: computed(() => district.value ? `${district.value.district} District` : ''),
     address: {
       '@type': 'PostalAddress',
-      addressLocality: district.value.district,
-      addressRegion: district.value.statename,
+      addressLocality: computed(() => district.value?.district || ''),
+      addressRegion: computed(() => district.value?.statename || ''),
       addressCountry: 'IN',
     },
   }),
@@ -67,7 +69,7 @@ const filteredOffices = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6 sm:space-y-8">
+  <div v-if="district" class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />

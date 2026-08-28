@@ -3,7 +3,9 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const slug = computed(() => String(route.params.slug || ''))
 
-const { data, error } = await useFetch(`/api/post-office/${slug.value}`)
+const { data, error } = await useFetch(() => `/api/post-office/${slug.value}`, {
+  key: `post-office-${slug.value}`,
+})
 
 if (error.value || !data.value) {
   throw createError({
@@ -13,16 +15,16 @@ if (error.value || !data.value) {
   })
 }
 
-const office = computed(() => data.value.office)
-const siblingOffices = computed(() => data.value.siblingOffices)
+const office = computed(() => data.value?.office)
+const siblingOffices = computed(() => data.value?.siblingOffices || [])
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/post-office/${slug.value}`)
 
 // SEO Meta
-const title = computed(() => `${office.value.officename} PIN Code: ${office.value.pincode} - Address & Branch Details`)
+const title = computed(() => office.value ? `${office.value.officename} PIN Code: ${office.value.pincode} - Address & Branch Details` : '')
 const description = computed(
-  () => `${office.value.officename} is a ${office.value.officetype} post office in ${office.value.district}, ${office.value.statename}. PIN Code is ${office.value.pincode}. Delivery status: ${office.value.delivery}.`
+  () => office.value ? `${office.value.officename} is a ${office.value.officetype} post office in ${office.value.district}, ${office.value.statename}. PIN Code is ${office.value.pincode}. Delivery status: ${office.value.delivery}.` : ''
 )
 
 useSeoMeta({
@@ -38,31 +40,31 @@ useHead({
 })
 
 // Breadcrumbs
-const breadcrumbs = computed(() => [
+const breadcrumbs = computed(() => office.value ? [
   { name: office.value.statename, path: `/state/${office.value.state_slug}/pincodes` },
   { name: office.value.district, path: `/district/${office.value.district_slug}/pincodes` },
   { name: office.value.pincode, path: `/pincode/${office.value.pincode}` },
   { name: office.value.officename, path: `/post-office/${slug.value}` },
-])
+] : [])
 
 useSchemaOrg([
   definePlace({
-    name: office.value.officename,
+    name: computed(() => office.value?.officename || ''),
     address: {
       '@type': 'PostalAddress',
-      streetAddress: office.value.officename,
-      addressLocality: office.value.district,
-      addressRegion: office.value.statename,
-      postalCode: office.value.pincode,
+      streetAddress: computed(() => office.value?.officename || ''),
+      addressLocality: computed(() => office.value?.district || ''),
+      addressRegion: computed(() => office.value?.statename || ''),
+      postalCode: computed(() => office.value?.pincode || ''),
       addressCountry: 'IN',
     },
-    geo: office.value.latitude && office.value.longitude
+    geo: computed(() => office.value?.latitude && office.value?.longitude
       ? {
-        '@type': 'GeoCoordinates',
-        latitude: office.value.latitude,
-        longitude: office.value.longitude,
-      }
-      : undefined,
+          '@type': 'GeoCoordinates',
+          latitude: office.value.latitude,
+          longitude: office.value.longitude,
+        }
+      : undefined),
   }),
 ])
 
@@ -70,11 +72,13 @@ useSchemaOrg([
 const isCopied = ref(false)
 const copyPin = async () => {
   try {
-    await navigator.clipboard.writeText(office.value.pincode)
-    isCopied.value = true
-    setTimeout(() => {
-      isCopied.value = false
-    }, 2000)
+    if (office.value?.pincode) {
+      await navigator.clipboard.writeText(office.value.pincode)
+      isCopied.value = true
+      setTimeout(() => {
+        isCopied.value = false
+      }, 2000)
+    }
   } catch (err) {
     console.error('Failed to copy', err)
   }
@@ -82,7 +86,7 @@ const copyPin = async () => {
 </script>
 
 <template>
-  <div class="space-y-6 sm:space-y-8">
+  <div v-if="office" class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />

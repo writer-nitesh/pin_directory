@@ -16,12 +16,12 @@ const fullItems = computed(() => [
 
 // Auto-register Schema.org BreadcrumbList
 useSchemaOrg([
-  defineBreadcrumb(
-    fullItems.value.map(item => ({
+  defineBreadcrumb({
+    itemListElement: fullItems.value.map(item => ({
       name: item.name,
       item: item.path,
-    }))
-  ),
+    })),
+  }),
 ])
 </script>
 

@@ -24,7 +24,18 @@ const CITY_MAP: Record<string, string[]> = {
   gurugram: ['gurugram'],
 }
 
-export default defineEventHandler((event) => {
+export interface CityApiResponse {
+  cityName: string
+  citySlug: string
+  statename: string
+  matchedDistricts: any[]
+  pincodes: any[]
+  offices: any[]
+  totalOffices: number
+  deliveryOfficesCount: number
+}
+
+export default defineEventHandler((event): CityApiResponse => {
   const citySlug = getRouterParam(event, 'city')?.toLowerCase().trim()
   if (!citySlug) {
     throw createError({ statusCode: 400, statusMessage: 'City slug is required.' })
@@ -44,7 +55,7 @@ export default defineEventHandler((event) => {
 
   // If no district matched directly, try matching by district name or office name
   if (matchedDistrictSlugs.length === 0) {
-    const fromOffices = db.prepare<[string], any>(
+    const fromOffices = db.prepare<[string, string], any>(
       'SELECT DISTINCT district_slug, district, statename FROM post_offices WHERE officename LIKE ? OR district LIKE ? LIMIT 5'
     ).all(`%${citySlug}%`, `%${citySlug}%`)
 

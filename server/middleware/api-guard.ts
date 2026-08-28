@@ -11,6 +11,13 @@ export default defineEventHandler((event) => {
     return
   }
 
+  // Bypass guard for internal Nitro SSR requests
+  // During SSR, Nuxt forwards incoming browser headers (including sec-fetch-dest: document)
+  // to internal $fetch calls. Internal dispatches do not have a real network socket remoteAddress.
+  if (!event.node.req.socket?.remoteAddress) {
+    return
+  }
+
   const req = event.node.req
   const headers = req.headers
 
