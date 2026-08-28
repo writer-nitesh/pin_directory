@@ -66,6 +66,10 @@ export default defineNuxtConfig({
     trailingSlash: false,
   },
 
+  linkChecker: {
+    enabled: false,
+  },
+
   routeRules: {
     "/about": { prerender: true },
     "/privacy": { prerender: true },

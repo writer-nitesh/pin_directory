@@ -22,7 +22,7 @@ importers:
         version: 4.11.0(9407325a26cab86ed379180982e4ab9d)
       '@nuxtjs/seo':
         specifier: ^5.3.14
-        version: 5.3.14(a41747267f5f00bb03423b921558dfff)
+        version: 5.3.14(7334ae751922fa8d3044133130f16df4)
       '@pinia/nuxt':
         specifier: ^1.0.2
         version: 1.0.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.143.0)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@5.8.3)(vue@3.5.41(typescript@5.8.3)))(rolldown@1.2.6)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.6)(rollup@4.63.0)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0)))
@@ -54,6 +54,9 @@ importers:
       '@iconify-json/heroicons':
         specifier: ^1.2.3
         version: 1.2.3
+      '@takumi-rs/wasm':
+        specifier: ^2.12.0
+        version: 2.12.0(csstype@3.2.3)
       '@types/better-sqlite3':
         specifier: ^9.6.0
         version: 9.6.0
@@ -1885,6 +1888,18 @@ packages:
       csstype:
         optional: true
 
+  '@takumi-rs/helpers@2.12.0':
+    resolution: {integrity: sha512-3DF+spdZEKvFahc3SXQ3roXL9DzQkPoQ/oqopKT0bcXd3QiROTyYncRgzqUnEfBlFp236m9pSFVRSwW2GvLO9w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      preact: ^10.0.0
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+
   '@takumi-rs/helpers@2.7.3':
     resolution: {integrity: sha512-maqzWFRHoohIoWwOnmELCNAOtFqZEy1xEghDTWxifHM0p4sDKXbkoF9Ti6HwSi5NLRdyppczSMU+sO/MDF1LXw==}
     engines: {node: '>=18'}
@@ -1895,6 +1910,15 @@ packages:
       preact:
         optional: true
       react:
+        optional: true
+
+  '@takumi-rs/wasm@2.12.0':
+    resolution: {integrity: sha512-tGwNU96tWZZCqrCogy5nHfablvUW6UtzK52Ydnkld7hnNdzyU3eHrCzxNKmSf+tHYJHHKLgyOpgEnxFBIqriFQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      csstype: '*'
+    peerDependenciesMeta:
+      csstype:
         optional: true
 
   '@tanstack/table-core@8.21.3':
@@ -7190,14 +7214,14 @@ snapshots:
       - vite
       - vue
 
-  '@nuxtjs/seo@5.3.14(a41747267f5f00bb03423b921558dfff)':
+  '@nuxtjs/seo@5.3.14(7334ae751922fa8d3044133130f16df4)':
     dependencies:
       '@nuxt/kit': 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.6)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.6)(rollup@4.63.0)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0)))
       '@nuxtjs/robots': 6.2.0(f9bc52dc091ed8f319424b9d38bba71c)
       '@nuxtjs/sitemap': 8.5.0(f9bc52dc091ed8f319424b9d38bba71c)
       nuxt: 4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@oxc-project/types@0.147.0)(@types/node@26.3.0)(@vue/compiler-sfc@3.5.41)(better-sqlite3@13.0.3)(db0@0.3.4(better-sqlite3@13.0.3))(esbuild@0.28.2)(ioredis@5.11.1)(lightningcss@1.33.0)(magicast@0.5.4)(oxc-parser@0.143.0)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@5.8.3)(vue@3.5.41(typescript@5.8.3)))(rolldown@1.2.6)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.6)(rollup@4.63.0))(rollup@4.63.0)(srvx@0.11.22)(terser@5.51.0)(typescript@5.8.3)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))(vue-tsc@3.3.11(typescript@5.8.3))(yaml@2.9.0)
       nuxt-link-checker: 5.3.0(f661641d98cf4a7c1e6c525034a866b9)
-      nuxt-og-image: 6.7.8(e51d10a109d419a8e8382ccf783601ac)
+      nuxt-og-image: 6.7.8(4c66fdd78e699e9de88881af685188b3)
       nuxt-schema-org: 6.3.1(306da813e2ede94108ac48686763c299)
       nuxt-seo-utils: 8.4.3(3f928d74cb5f7e46346167edfd4cc9f2)
       nuxt-site-config: 4.2.3(f9bc52dc091ed8f319424b9d38bba71c)
@@ -7817,7 +7841,18 @@ snapshots:
       - preact
       - react
 
+  '@takumi-rs/helpers@2.12.0': {}
+
   '@takumi-rs/helpers@2.7.3': {}
+
+  '@takumi-rs/wasm@2.12.0(csstype@3.2.3)':
+    dependencies:
+      '@takumi-rs/helpers': 2.12.0
+    optionalDependencies:
+      csstype: 3.2.3
+    transitivePeerDependencies:
+      - preact
+      - react
 
   '@tanstack/table-core@8.21.3': {}
 
@@ -10499,7 +10534,7 @@ snapshots:
       - rolldown
       - unplugin
 
-  nuxt-og-image@6.7.8(e51d10a109d419a8e8382ccf783601ac):
+  nuxt-og-image@6.7.8(4c66fdd78e699e9de88881af685188b3):
     dependencies:
       '@clack/prompts': 1.7.0
       '@nuxt/kit': 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.6)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.6)(rollup@4.63.0)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0)))
@@ -10535,6 +10570,7 @@ snapshots:
       unstorage: 1.17.5(db0@0.3.4(better-sqlite3@13.0.3))(ioredis@5.11.1)
     optionalDependencies:
       '@takumi-rs/core': 2.7.3(csstype@3.2.3)
+      '@takumi-rs/wasm': 2.12.0(csstype@3.2.3)
       fontless: 0.2.1(db0@0.3.4(better-sqlite3@13.0.3))(ioredis@5.11.1)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))
       nitropack: 2.13.4(better-sqlite3@13.0.3)(oxc-parser@0.143.0)(rolldown@1.2.6)(srvx@0.11.22)(vite@8.2.2(@types/node@26.3.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.0)(yaml@2.9.0))
       tailwindcss: 4.3.3
