@@ -38,7 +38,7 @@ const toggle = (idx: number) => {
       {{ title || 'Frequently Asked Questions' }}
     </h2>
 
-    <div class="divide-y divide-zinc-200 border border-zinc-200 rounded-xl bg-white overflow-hidden shadow-xs">
+    <div class="divide-y divide-zinc-200 border border-zinc-200 rounded-md bg-white overflow-hidden shadow-xs">
       <div v-for="(faq, idx) in faqs" :key="idx" class="transition-colors">
         <button
           type="button"

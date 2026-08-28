@@ -54,19 +54,19 @@ const filteredDistricts = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
 
     <!-- State Hero Banner -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <div class="flex items-center gap-2 mb-1">
         <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
           State Postal Directory
         </span>
       </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
         {{ state.statename }} PIN Codes
       </h1>
       <p class="text-sm sm:text-base text-zinc-600 max-w-3xl">
@@ -75,15 +75,15 @@ const filteredDistricts = computed(() => {
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-3 gap-4 pt-2">
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">Districts</span>
           <span class="text-xl sm:text-2xl font-extrabold text-zinc-900 font-mono">{{ state.district_count }}</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">PIN Codes</span>
           <span class="text-xl sm:text-2xl font-extrabold text-sky-600 font-mono">{{ state.pincode_count }}</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">Post Offices</span>
           <span class="text-xl sm:text-2xl font-extrabold text-zinc-900 font-mono">{{ state.office_count }}</span>
         </div>
@@ -91,7 +91,7 @@ const filteredDistricts = computed(() => {
     </div>
 
     <!-- Districts Section -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 class="text-xl font-bold text-zinc-900 tracking-tight">Districts in {{ state.statename }}</h2>
@@ -103,7 +103,7 @@ const filteredDistricts = computed(() => {
             v-model="searchQuery"
             type="text"
             placeholder="Filter districts..."
-            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-md border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
@@ -113,7 +113,7 @@ const filteredDistricts = computed(() => {
           v-for="d in filteredDistricts"
           :key="d.district_slug"
           :to="`/district/${d.district_slug}/pincodes`"
-          class="p-4 rounded-xl border border-zinc-200 hover:border-sky-300 hover:bg-sky-50/20 transition flex items-center justify-between group"
+          class="p-4 rounded-md border border-zinc-200 hover:border-sky-300 hover:bg-sky-50/20 transition flex items-center justify-between group"
         >
           <div>
             <div class="font-semibold text-zinc-900 group-hover:text-sky-600 transition text-sm">
@@ -131,14 +131,14 @@ const filteredDistricts = computed(() => {
     <AdSlot placement="in-content" />
 
     <!-- Sample Major PIN Codes -->
-    <div v-if="topPincodes.length > 0" class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div v-if="topPincodes.length > 0" class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <h2 class="text-lg font-bold text-zinc-900 tracking-tight">Major PIN Codes in {{ state.statename }}</h2>
       <div class="flex flex-wrap gap-2">
         <NuxtLink
           v-for="p in topPincodes"
           :key="p.pincode"
           :to="`/pincode/${p.pincode}`"
-          class="px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 hover:border-sky-300 hover:bg-sky-50 text-xs font-mono font-semibold text-zinc-800 transition"
+          class="px-3 py-1.5 rounded-md bg-zinc-50 border border-zinc-200 hover:border-sky-300 hover:bg-sky-50 text-xs font-mono font-semibold text-zinc-800 transition"
         >
           {{ p.pincode }} ({{ p.district }})
         </NuxtLink>

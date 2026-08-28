@@ -23,7 +23,7 @@ const canonicalUrl = computed(() => `${config.public.siteUrl}/district/${distric
 // SEO Meta
 const title = computed(() => `${district.value.district} District PIN Codes: Postal Codes & Post Offices`)
 const description = computed(
-  () => `All PIN codes and post offices in ${district.value.district} district, ${district.value.statename}. View ${pincodes.value.length} PIN codes, delivery post offices, and branch types.`
+  () => `All PIN codes and post offices in ${district.value.district} district, ${district.value.statename}. View ${pincodes.value.length} PIN codes and delivery post offices.`
 )
 
 useSeoMeta({
@@ -67,13 +67,13 @@ const filteredOffices = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
 
     <!-- District Header -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <div class="flex items-center gap-2 mb-1">
         <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
           District Directory
@@ -83,43 +83,44 @@ const filteredOffices = computed(() => {
         </NuxtLink>
       </div>
 
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
         {{ district.district }} PIN Codes
       </h1>
       <p class="text-sm sm:text-base text-zinc-600 max-w-3xl">
-        Postal codes, post office branches, and delivery information for {{ district.district }} district in {{ district.statename }}, India.
+        Postal codes, post office branches, and delivery information for {{ district.district }} district in {{
+          district.statename }}, India.
       </p>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">Total PIN Codes</span>
           <span class="text-xl sm:text-2xl font-extrabold text-sky-600 font-mono">{{ pincodes.length }}</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">Post Offices</span>
           <span class="text-xl sm:text-2xl font-extrabold text-zinc-900 font-mono">{{ offices.length }}</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center col-span-2 sm:col-span-1">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center col-span-2 sm:col-span-1">
           <span class="text-xs text-zinc-500 block">State</span>
           <span class="text-base sm:text-lg font-bold text-zinc-900 truncate block">{{ district.statename }}</span>
         </div>
       </div>
     </div>
 
+
+
+    <AdSlot placement="in-content" />
     <!-- PIN Codes Grid -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <h2 class="text-xl font-bold text-zinc-900 tracking-tight">
         PIN Codes in {{ district.district }}
       </h2>
-      <p class="text-xs text-zinc-500">Click any 6-digit postal code to view all associated post office branches and locations</p>
+      <p class="text-xs text-zinc-500">Click any 6-digit postal code to view all associated post office branches and
+        locations</p>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 pt-2">
-        <NuxtLink
-          v-for="pin in pincodes"
-          :key="pin.pincode"
-          :to="`/pincode/${pin.pincode}`"
-          class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 hover:border-sky-400 hover:bg-sky-50 transition text-center group"
-        >
+        <NuxtLink v-for="pin in pincodes" :key="pin.pincode" :to="`/pincode/${pin.pincode}`"
+          class="p-3 rounded-md bg-zinc-50 border border-zinc-200 hover:border-sky-400 hover:bg-sky-50 transition text-center group">
           <div class="text-base font-extrabold font-mono text-zinc-900 group-hover:text-sky-600">
             {{ pin.pincode }}
           </div>
@@ -130,10 +131,8 @@ const filteredOffices = computed(() => {
       </div>
     </div>
 
-    <AdSlot placement="in-content" />
-
     <!-- Post Offices Table -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 class="text-xl font-bold text-zinc-900 tracking-tight">
@@ -143,12 +142,8 @@ const filteredOffices = computed(() => {
         </div>
 
         <div class="w-full sm:w-64">
-          <input
-            v-model="officeQuery"
-            type="text"
-            placeholder="Search post offices or PIN..."
-            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
+          <input v-model="officeQuery" type="text" placeholder="Search post offices or PIN..."
+            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-md border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500" />
         </div>
       </div>
 
@@ -158,7 +153,6 @@ const filteredOffices = computed(() => {
             <tr>
               <th class="py-3 px-4">Post Office</th>
               <th class="py-3 px-4">PIN Code</th>
-              <th class="py-3 px-4">Branch Type</th>
               <th class="py-3 px-4">Delivery Status</th>
             </tr>
           </thead>
@@ -175,16 +169,10 @@ const filteredOffices = computed(() => {
                 </NuxtLink>
               </td>
               <td class="py-3 px-4">
-                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-zinc-100 text-zinc-700">
-                  {{ office.officetype || 'PO' }}
-                </span>
-              </td>
-              <td class="py-3 px-4">
-                <span
-                  class="text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
-                  :class="office.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="office.delivery === 'Delivery' ? 'bg-emerald-600' : 'bg-zinc-400'" />
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+                  :class="office.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'">
+                  <span class="w-1.5 h-1.5 rounded-full"
+                    :class="office.delivery === 'Delivery' ? 'bg-emerald-600' : 'bg-zinc-400'" />
                   {{ office.delivery }}
                 </span>
               </td>

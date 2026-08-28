@@ -11,13 +11,13 @@ const showAds = computed(() => Boolean(config.public.showAds))
 const slotClasses = computed(() => {
   switch (props.placement) {
     case 'header-leaderboard':
-      return 'w-full max-w-4xl min-h-[90px] md:min-h-[90px] my-4'
+      return 'w-full min-h-[90px] md:min-h-[90px] my-4'
     case 'in-content':
-      return 'w-full max-w-2xl min-h-[250px] md:min-h-[280px] my-6'
+      return 'w-full max-w-3xl min-h-[250px] md:min-h-[280px] my-6'
     case 'sidebar':
       return 'w-full min-h-[300px] md:min-h-[600px] my-4'
     case 'bottom-banner':
-      return 'w-full max-w-4xl min-h-[60px] md:min-h-[90px] mt-8 mb-4'
+      return 'w-full min-h-[60px] md:min-h-[90px] mt-8 mb-4'
     default:
       return 'min-h-[100px] my-4'
   }

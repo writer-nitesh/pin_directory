@@ -24,7 +24,7 @@ const canonicalUrl = computed(() => `${config.public.siteUrl}/pincode/${code.val
 // SEO Meta Tags
 const pageTitle = computed(() => `${code.value} PIN Code: Address, Post Offices & ${summary.value.district} Details`)
 const pageDescription = computed(
-  () => `Get PIN code ${code.value} address details in ${summary.value.district}, ${summary.value.statename}. View all ${offices.value.length} post offices, delivery status, branch types, and nearby PIN codes.`
+  () => `Get PIN code ${code.value} address details in ${summary.value.district}, ${summary.value.statename}. View all ${offices.value.length} post offices, delivery status, and nearby PIN codes.`
 )
 
 useSeoMeta({
@@ -106,7 +106,7 @@ const faqs = computed(() => [
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <!-- Breadcrumb Navigation with Schema.org -->
     <BreadcrumbNav :items="breadcrumbs" />
 
@@ -114,7 +114,7 @@ const faqs = computed(() => [
     <AdSlot placement="header-leaderboard" />
 
     <!-- Main PIN Hero Card -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-100 pb-6">
         <div>
           <div class="flex items-center gap-2 mb-1">
@@ -123,7 +123,7 @@ const faqs = computed(() => [
             </span>
             <span class="text-xs text-zinc-600">• {{ summary.statename }}</span>
           </div>
-          <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight font-mono">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight font-mono">
             {{ code }}
           </h1>
           <p class="text-sm text-zinc-500 mt-1">
@@ -135,7 +135,7 @@ const faqs = computed(() => [
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-xs"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-sm transition shadow-xs"
             :class="isCopied ? 'bg-emerald-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-700'"
             @click="copyPin"
           >
@@ -147,26 +147,26 @@ const faqs = computed(() => [
 
       <!-- Key Metadata Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm">
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">District</span>
           <NuxtLink :to="`/district/${summary.district_slug}/pincodes`" class="font-bold text-zinc-900 hover:text-sky-600 transition">
             {{ summary.district }}
           </NuxtLink>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">State</span>
           <NuxtLink :to="`/state/${summary.state_slug}/pincodes`" class="font-bold text-zinc-900 hover:text-sky-600 transition">
             {{ summary.statename }}
           </NuxtLink>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">Postal Circle</span>
           <span class="font-bold text-zinc-900">{{ summary.circle || 'India Post' }}</span>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">Post Offices</span>
           <span class="font-bold text-zinc-900 font-mono">{{ offices.length }} Registered</span>
         </div>
@@ -174,13 +174,13 @@ const faqs = computed(() => [
     </div>
 
     <!-- Post Offices Table Section -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">
             Post Offices Serving PIN Code {{ code }}
           </h2>
-          <p class="text-xs text-zinc-500">Official post office branches, types, and delivery coverage</p>
+          <p class="text-xs text-zinc-500">Post offices and delivery status under this PIN code</p>
         </div>
         <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-zinc-100 text-zinc-700">
           {{ offices.length }} Branches
@@ -192,10 +192,8 @@ const faqs = computed(() => [
           <thead class="bg-zinc-50 text-zinc-600 uppercase text-[11px] font-semibold border-y border-zinc-200">
             <tr>
               <th class="py-3 px-4">Post Office Name</th>
-              <th class="py-3 px-4">Branch Type</th>
               <th class="py-3 px-4">Delivery Status</th>
-              <th class="py-3 px-4 hidden md:table-cell">Division</th>
-              <th class="py-3 px-4 hidden sm:table-cell">Region</th>
+              <th class="py-3 px-4 hidden sm:table-cell">Division</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-100">
@@ -207,11 +205,6 @@ const faqs = computed(() => [
                 </NuxtLink>
               </td>
               <td class="py-3 px-4">
-                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-zinc-100 text-zinc-700">
-                  {{ office.officetype || 'PO' }}
-                </span>
-              </td>
-              <td class="py-3 px-4">
                 <span
                   class="text-[11px] font-semibold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
                   :class="office.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'"
@@ -220,11 +213,8 @@ const faqs = computed(() => [
                   {{ office.delivery }}
                 </span>
               </td>
-              <td class="py-3 px-4 text-zinc-600 hidden md:table-cell">
-                {{ office.division || '-' }}
-              </td>
               <td class="py-3 px-4 text-zinc-600 hidden sm:table-cell">
-                {{ office.region || '-' }}
+                {{ office.division || '-' }}
               </td>
             </tr>
           </tbody>
@@ -236,7 +226,7 @@ const faqs = computed(() => [
     <AdSlot placement="in-content" />
 
     <!-- Sibling & Nearby PIN Codes in District -->
-    <div v-if="nearby.length > 0" class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div v-if="nearby.length > 0" class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <h2 class="text-lg font-bold text-zinc-900 tracking-tight">
         Nearby PIN Codes in {{ summary.district }} District
       </h2>

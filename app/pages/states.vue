@@ -33,20 +33,20 @@ const breadcrumbs = [
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
 
     <!-- Hero -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <div class="flex items-center gap-2 mb-1">
         <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
           National Directory
         </span>
       </div>
 
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
         Indian States & Union Territories
       </h1>
       <p class="text-sm sm:text-base text-zinc-600 max-w-3xl">
@@ -58,7 +58,7 @@ const breadcrumbs = [
           v-model="searchQuery"
           type="text"
           placeholder="Filter states (e.g. Maharashtra, Delhi, Karnataka)..."
-          class="w-full px-4 py-2.5 text-sm rounded-xl border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          class="w-full px-4 py-2.5 text-sm rounded-md border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
       </div>
     </div>
@@ -69,7 +69,7 @@ const breadcrumbs = [
         v-for="s in filteredStates"
         :key="s.state_slug"
         :to="`/state/${s.state_slug}/pincodes`"
-        class="p-5 rounded-2xl bg-white border border-zinc-200 hover:border-sky-300 hover:shadow-md transition group flex flex-col justify-between"
+        class="p-5 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:shadow-md transition group flex flex-col justify-between"
       >
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-bold text-base text-zinc-900 group-hover:text-sky-600 transition">

@@ -23,6 +23,10 @@ def clean_title(text: str) -> str:
         return " ".join(w.capitalize() for w in words)
     return text
 
+def clean_officename(text: str) -> str:
+    text = clean_title(text)
+    return re.sub(r'\s+(?:b\.?o\.?|s\.?o\.?|h\.?o\.?|g\.?p\.?o\.?|p\.?o\.?)$', '', text, flags=re.IGNORECASE).strip()
+
 def main():
     os.makedirs(DB_DIR, exist_ok=True)
     if os.path.exists(DB_PATH):
@@ -125,7 +129,7 @@ def main():
             state_slug = slugify(raw_state)
             district = clean_title(raw_district)
             district_slug = slugify(raw_district)
-            officename = clean_title(raw_office)
+            officename = clean_officename(raw_office)
             office_slug = slugify(raw_office)
 
             delivery = "Delivery" if "delivery" in raw_delivery.lower() and "non" not in raw_delivery.lower() else "Non-Delivery"

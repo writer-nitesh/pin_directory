@@ -1,6 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  ssr: true,
+
   modules: [
+    "@pinia/nuxt",
     "@nuxt/ui",
     "@nuxtjs/seo",
     "@nuxt/icon",
@@ -9,6 +12,11 @@ export default defineNuxtConfig({
   ],
 
   devtools: { enabled: true },
+
+  colorMode: {
+    preference: 'light',
+    fallback: 'light',
+  },
 
   css: ["~/assets/css/main.css"],
 

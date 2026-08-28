@@ -1,14 +1,16 @@
 <script setup lang="ts">
-const config = useRuntimeConfig()
+import { useRecentSearchesStore } from '~/stores/recentSearches'
 
-// SEO Meta
-useSeoMeta({
-  title: 'India PIN Code Search - Find Postal Codes, Post Offices & Addresses',
-  ogTitle: 'India PIN Code Search - Find Postal Codes, Post Offices & Addresses',
-  description: 'Search 19,500+ Indian PIN codes and 165,000+ post offices across all states and districts. Fast, modern postal directory with GPS location finder.',
-  ogDescription: 'Search 19,500+ Indian PIN codes and 165,000+ post offices across all states and districts. Fast, modern postal directory with GPS location finder.',
-  ogType: 'website',
+const config = useRuntimeConfig()
+const recentSearchesStore = useRecentSearchesStore()
+const isClientMounted = ref(false)
+
+onMounted(() => {
+  isClientMounted.value = true
+  recentSearchesStore.loadFromStorage()
 })
+
+const recentSearches = computed(() => recentSearchesStore.history)
 
 // Fetch States for directory grid
 const { data: statesData } = await useFetch('/api/states')
@@ -46,19 +48,19 @@ const homeFaqs = [
 </script>
 
 <template>
-  <div class="space-y-12">
+  <div class="space-y-8 sm:space-y-10">
     <!-- Hero Section -->
-    <section class="text-center py-6 sm:py-10 space-y-4">
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200/60 mb-2">
+    <section class="text-center py-4 sm:py-8 space-y-3">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200/60 mb-1">
         <UIcon name="i-heroicons-sparkles" class="w-3.5 h-3.5 text-sky-600" />
         <span>165,000+ Post Offices • Updated Postal Directory</span>
       </div>
 
-      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 leading-tight">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-900 leading-tight">
         Indian PIN Code & Address Search
       </h1>
 
-      <p class="max-w-2xl mx-auto text-base sm:text-lg text-zinc-600">
+      <p class="max-w-2xl mx-auto text-sm sm:text-base text-zinc-600">
         Lookup postal codes, post office addresses, delivery status, and districts across India with instant search and GPS detection.
       </p>
 
@@ -67,13 +69,47 @@ const homeFaqs = [
         <SearchBar />
       </div>
 
-      <!-- Quick Shortcuts -->
+      <!-- Dynamic Recent Searches from Pinia / Fallback Popular Shortcuts -->
       <div class="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-zinc-500">
-        <span class="font-medium text-zinc-700">Quick Searches:</span>
-        <NuxtLink to="/pincode/110001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">110001 (New Delhi)</NuxtLink>
-        <NuxtLink to="/pincode/400001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">400001 (Mumbai)</NuxtLink>
-        <NuxtLink to="/pincode/560001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">560001 (Bangalore)</NuxtLink>
-        <NuxtLink to="/pincode/500001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">500001 (Hyderabad)</NuxtLink>
+        <template v-if="isClientMounted && recentSearches.length > 0">
+          <span class="font-medium text-zinc-700 flex items-center gap-1">
+            <UIcon name="i-heroicons-clock" class="w-3.5 h-3.5 text-sky-600" />
+            Recent Searches:
+          </span>
+          <NuxtLink
+            v-for="(item, idx) in recentSearches"
+            :key="idx"
+            :to="item.path"
+            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition text-zinc-800"
+          >
+            <UIcon
+              :name="
+                item.type === 'state'
+                  ? 'i-heroicons-building-library'
+                  : item.type === 'district'
+                  ? 'i-heroicons-building-office-2'
+                  : 'i-heroicons-map-pin'
+              "
+              class="w-3 h-3 text-zinc-400"
+            />
+            <span class="font-medium">{{ item.title }}</span>
+          </NuxtLink>
+          <button
+            type="button"
+            class="text-[11px] text-zinc-400 hover:text-red-500 underline ml-1"
+            title="Clear search history"
+            @click="recentSearchesStore.clearHistory()"
+          >
+            Clear
+          </button>
+        </template>
+        <template v-else>
+          <span class="font-medium text-zinc-700">Quick Searches:</span>
+          <NuxtLink to="/pincode/110001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">110001 (New Delhi)</NuxtLink>
+          <NuxtLink to="/pincode/400001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">400001 (Mumbai)</NuxtLink>
+          <NuxtLink to="/pincode/560001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">560001 (Bangalore)</NuxtLink>
+          <NuxtLink to="/pincode/500001" class="px-2.5 py-1 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:text-sky-600 transition font-mono">500001 (Hyderabad)</NuxtLink>
+        </template>
       </div>
     </section>
 
@@ -98,7 +134,7 @@ const homeFaqs = [
           v-for="city in popularCities"
           :key="city.slug"
           :to="`/city/${city.slug}/pincodes`"
-          class="p-4 rounded-xl bg-white border border-zinc-200 hover:border-sky-400 hover:shadow-md transition group"
+          class="p-4 rounded-md bg-white border border-zinc-200 hover:border-sky-400 hover:shadow-md transition group"
         >
           <div class="flex items-center justify-between mb-1">
             <span class="font-semibold text-zinc-900 group-hover:text-sky-600 transition text-sm sm:text-base">
@@ -123,7 +159,7 @@ const homeFaqs = [
           v-for="state in states"
           :key="state.state_slug"
           :to="`/state/${state.state_slug}/pincodes`"
-          class="p-3.5 rounded-lg bg-white border border-zinc-200 hover:border-sky-300 hover:bg-sky-50/30 transition text-left"
+          class="p-3.5 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:bg-sky-50/30 transition text-left"
         >
           <div class="font-semibold text-xs sm:text-sm text-zinc-900 truncate">
             {{ state.statename }}
@@ -141,9 +177,9 @@ const homeFaqs = [
     <AdSlot placement="in-content" />
 
     <!-- Explainer / Educational Section -->
-    <section class="bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 space-y-6">
+    <section class="bg-white rounded-md border border-zinc-200 p-6 sm:p-8 space-y-6">
       <div class="max-w-2xl">
-        <h2 class="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mb-2">
+        <h2 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight mb-2">
           How India's 6-Digit PIN System Works
         </h2>
         <p class="text-sm text-zinc-600 leading-relaxed">
@@ -152,15 +188,15 @@ const homeFaqs = [
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-        <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-100 space-y-1.5">
+        <div class="p-4 rounded-md bg-zinc-50 border border-zinc-100 space-y-1.5">
           <span class="font-bold text-sky-700 text-sm font-mono">1st Digit: Zone</span>
           <p class="text-zinc-600">Identifies one of the 9 postal regions (8 geographic regions covering civilian zones + 1 functional region for the Army Postal Service).</p>
         </div>
-        <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-100 space-y-1.5">
+        <div class="p-4 rounded-md bg-zinc-50 border border-zinc-100 space-y-1.5">
           <span class="font-bold text-sky-700 text-sm font-mono">2nd & 3rd Digit: Sub-Zone</span>
           <p class="text-zinc-600">Combined with the 1st digit, narrows down the sorting district and revenue division within the designated state.</p>
         </div>
-        <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-100 space-y-1.5">
+        <div class="p-4 rounded-md bg-zinc-50 border border-zinc-100 space-y-1.5">
           <span class="font-bold text-sky-700 text-sm font-mono">Last 3 Digits: Post Office</span>
           <p class="text-zinc-600">Specifies the individual destination delivery post office (Head Post Office HO, Sub Post Office SO, or Branch Office BO).</p>
         </div>

@@ -67,10 +67,19 @@ export default defineEventHandler((event) => {
     `SELECT * FROM pincodes_summary WHERE district_slug IN (${pinPlaceholders}) ORDER BY pincode ASC`
   ).all(...matchedDistrictSlugs)
 
-  // Fetch post offices sample
+  // Fetch post offices prioritizing delivery offices
   const offices = db.prepare<string[], any>(
-    `SELECT * FROM post_offices WHERE district_slug IN (${pinPlaceholders}) ORDER BY delivery DESC, officename ASC LIMIT 60`
+    `SELECT * FROM post_offices WHERE district_slug IN (${pinPlaceholders}) ORDER BY CASE WHEN delivery = 'Delivery' THEN 0 ELSE 1 END, officename ASC LIMIT 60`
   ).all(...matchedDistrictSlugs)
+
+  // Compute accurate delivery stats
+  const totalOffices = db.prepare<string[], { count: number }>(
+    `SELECT count(*) as count FROM post_offices WHERE district_slug IN (${pinPlaceholders})`
+  ).get(...matchedDistrictSlugs)?.count || offices.length
+
+  const deliveryOfficesCount = db.prepare<string[], { count: number }>(
+    `SELECT count(*) as count FROM post_offices WHERE district_slug IN (${pinPlaceholders}) AND delivery = 'Delivery'`
+  ).get(...matchedDistrictSlugs)?.count || 0
 
   const cityName = citySlug.charAt(0).toUpperCase() + citySlug.slice(1)
 
@@ -81,5 +90,7 @@ export default defineEventHandler((event) => {
     matchedDistricts: districts,
     pincodes,
     offices,
+    totalOffices,
+    deliveryOfficesCount,
   }
 })

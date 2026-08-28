@@ -1,8 +1,11 @@
-- remove Branch Type and Delivery Status
+- tell me  remove Branch Type and Delivery Status
 - is in Post Office Name BO PO SO is okay ??
 - in search states bhi seach ho 
 - quick seaches me  last 4-5 dikha local storage me store kar k pinnia use karna 
 - sab kuch ssr hoga 
 - API public access nhi honge
-- search feature robots use kar skte hai 
-- use GPS kaam nhi kar rha hai 
+- search feature robots use kar skte hai ??
+- Dont reveal data source : " Data sourced from All India Pincode Directory (Open Government Data OGD Platform / Department of Posts)."
+
+
+aise pages me bhi copy ka dikhange pin code Home>Karnataka>Bengaluru Urban>560001>CMM Court Complex S.O

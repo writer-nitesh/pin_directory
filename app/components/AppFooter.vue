@@ -58,7 +58,7 @@
 
       <!-- Bottom Disclaimer & Attribution -->
       <div class="pt-8 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-600">
-        <p>© {{ new Date().getFullYear() }} PinDirectory.in — Data sourced from All India Pincode Directory (Open Government Data OGD Platform / Department of Posts).</p>
+        <p>© {{ new Date().getFullYear() }} PinDirectory.in — All rights reserved.</p>
         <div class="flex items-center gap-4 text-zinc-600">
           <NuxtLink to="/about" class="hover:underline">About</NuxtLink>
           <NuxtLink to="/privacy" class="hover:underline">Privacy</NuxtLink>

@@ -74,14 +74,14 @@ const copyPin = async () => {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto space-y-8 py-4">
+  <div class="space-y-6 sm:space-y-8">
     <!-- Header -->
-    <div class="text-center space-y-3">
+    <div class="text-center space-y-3 pt-2">
       <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
         <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 text-sky-600" />
         <span>Instant GPS Postal Detection</span>
       </div>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
         Find My PIN Code
       </h1>
       <p class="text-sm sm:text-base text-zinc-600 max-w-xl mx-auto">
@@ -92,8 +92,8 @@ const copyPin = async () => {
     <AdSlot placement="header-leaderboard" />
 
     <!-- Action Card -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-10 shadow-xs text-center space-y-6">
-      <div class="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto shadow-inner">
+    <div class="max-w-2xl mx-auto bg-white border border-zinc-200 rounded-md p-6 sm:p-10 shadow-xs text-center space-y-6">
+      <div class="w-16 h-16 rounded-md bg-sky-50 text-sky-600 flex items-center justify-center mx-auto shadow-inner">
         <UIcon name="i-heroicons-globe-asia-australia" class="w-8 h-8" />
       </div>
 
@@ -107,18 +107,18 @@ const copyPin = async () => {
       <div>
         <button
           type="button"
-          class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-bold text-base bg-sky-600 text-white hover:bg-sky-700 transition shadow-md hover:shadow-lg disabled:opacity-50"
+          class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-md font-bold text-base bg-sky-600 text-white hover:bg-sky-700 transition shadow-md hover:shadow-lg disabled:opacity-50"
           :disabled="isLocating"
           @click="detectLocation"
         >
-          <UIcon v-if="!isLocating" name="i-heroicons-location-marker" class="w-5 h-5" />
+          <UIcon v-if="!isLocating" name="i-heroicons-map-pin" class="w-5 h-5" />
           <UIcon v-else name="i-heroicons-arrow-path" class="w-5 h-5 animate-spin" />
           <span>{{ isLocating ? 'Detecting Location Coordinates...' : 'Use My Current Location' }}</span>
         </button>
       </div>
 
       <!-- Error State -->
-      <div v-if="geoError" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm text-left flex items-start gap-2.5">
+      <div v-if="geoError" class="p-4 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm text-left flex items-start gap-2.5">
         <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0 mt-0.5" />
         <div>
           <span class="font-bold block">Location Detection Notice:</span>
@@ -127,7 +127,7 @@ const copyPin = async () => {
       </div>
 
       <!-- Success Result -->
-      <div v-if="result" class="p-6 rounded-2xl bg-sky-50/60 border-2 border-sky-200 text-left space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div v-if="result" class="p-6 rounded-md bg-sky-50/60 border-2 border-sky-200 text-left space-y-4 animate-in fade-in zoom-in-95 duration-200">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-sky-800">
             Nearest Postal Code Found

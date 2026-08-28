@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { useRecentSearchesStore } from '~/stores/recentSearches'
+
 const router = useRouter()
+const recentSearchesStore = useRecentSearchesStore()
+
 const query = ref('')
 const results = ref<any[]>([])
 const isLoading = ref(false)
@@ -34,7 +38,26 @@ const handleInput = () => {
 }
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (!isOpen.value || results.value.length === 0) return
+  if (!isOpen.value || results.value.length === 0) {
+    if (e.key === 'Enter') {
+      const q = query.value.trim()
+      if (!q) return
+      e.preventDefault()
+      if (/^\d{6}$/.test(q)) {
+        recentSearchesStore.addSearch({
+          title: q,
+          subtitle: 'PIN Code',
+          path: `/pincode/${q}`,
+          type: 'pincode',
+        })
+        router.push(`/pincode/${q}`)
+      } else {
+        router.push(`/search?q=${encodeURIComponent(q)}`)
+      }
+      isOpen.value = false
+    }
+    return
+  }
 
   if (e.key === 'ArrowDown') {
     e.preventDefault()
@@ -46,11 +69,19 @@ const handleKeyDown = (e: KeyboardEvent) => {
     e.preventDefault()
     if (activeIndex.value >= 0 && results.value[activeIndex.value]) {
       selectResult(results.value[activeIndex.value])
-    } else if (query.value.trim()) {
-      // If 6 digit pincode typed, go directly to pincode page
+    } else {
       const q = query.value.trim()
       if (/^\d{6}$/.test(q)) {
+        recentSearchesStore.addSearch({
+          title: q,
+          subtitle: 'PIN Code',
+          path: `/pincode/${q}`,
+          type: 'pincode',
+        })
         router.push(`/pincode/${q}`)
+        isOpen.value = false
+      } else if (q) {
+        router.push(`/search?q=${encodeURIComponent(q)}`)
         isOpen.value = false
       }
     }
@@ -62,7 +93,17 @@ const handleKeyDown = (e: KeyboardEvent) => {
 const selectResult = (item: any) => {
   isOpen.value = false
   query.value = ''
-  if (item.pincode) {
+
+  recentSearchesStore.addSearch({
+    title: item.title || item.officename || item.pincode,
+    subtitle: item.subtitle || `${item.district || ''}, ${item.statename || ''}`.trim().replace(/^,\s*|,\s*$/g, ''),
+    path: item.path || (item.pincode ? `/pincode/${item.pincode}` : `/search?q=${encodeURIComponent(item.title)}`),
+    type: item.type || 'pincode',
+  })
+
+  if (item.path) {
+    router.push(item.path)
+  } else if (item.pincode) {
     router.push(`/pincode/${item.pincode}`)
   }
 }
@@ -96,8 +137,8 @@ onMounted(() => {
         ref="searchInput"
         v-model="query"
         type="text"
-        placeholder="Enter PIN code, post office, or city (e.g. 110001, Connaught Place, Bangalore)..."
-        class="w-full pl-12 pr-28 py-3.5 sm:py-4 text-sm sm:text-base rounded-2xl bg-white border border-zinc-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition text-zinc-900 placeholder:text-zinc-500"
+        placeholder="Enter PIN code, state, district, or area (e.g. Karnataka, 110001, Indiranagar)..."
+        class="w-full pl-12 pr-28 py-3.5 sm:py-4 text-sm sm:text-base rounded-md bg-white border border-zinc-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition text-zinc-900 placeholder:text-zinc-500"
         autocomplete="off"
         @input="handleInput"
         @keydown="handleKeyDown"
@@ -117,7 +158,7 @@ onMounted(() => {
         </button>
         <NuxtLink
           to="/find-my-pincode"
-          class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 transition"
+          class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md bg-sky-50 text-sky-700 hover:bg-sky-100 transition"
           title="Detect my location"
         >
           <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 text-sky-600" />
@@ -129,10 +170,10 @@ onMounted(() => {
     <!-- Autocomplete Dropdown -->
     <div
       v-if="isOpen && results.length > 0"
-      class="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-zinc-200 overflow-hidden z-50 divide-y divide-zinc-100 animate-in fade-in slide-in-from-top-2 duration-150"
+      class="absolute left-0 right-0 top-full mt-2 bg-white rounded-md shadow-xl border border-zinc-200 overflow-hidden z-50 divide-y divide-zinc-100 animate-in fade-in slide-in-from-top-2 duration-150"
     >
       <div class="px-3 py-1.5 bg-zinc-50 flex items-center justify-between text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">
-        <span>Postal Search Results</span>
+        <span>Search Suggestions</span>
         <span>Press Enter to select</span>
       </div>
 
@@ -146,25 +187,57 @@ onMounted(() => {
           @click="selectResult(item)"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 text-zinc-600">
-              <UIcon name="i-heroicons-map-pin" class="w-4 h-4 text-sky-600" />
+            <!-- Icon based on type -->
+            <div
+              class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              :class="{
+                'bg-indigo-50 text-indigo-600': item.type === 'state',
+                'bg-amber-50 text-amber-600': item.type === 'district',
+                'bg-sky-50 text-sky-600': item.type === 'pincode' || item.type === 'office',
+              }"
+            >
+              <UIcon
+                :name="
+                  item.type === 'state'
+                    ? 'i-heroicons-building-library'
+                    : item.type === 'district'
+                    ? 'i-heroicons-building-office-2'
+                    : 'i-heroicons-map-pin'
+                "
+                class="w-4 h-4"
+              />
             </div>
             <div class="min-w-0">
               <div class="text-sm font-semibold text-zinc-900 truncate">
-                {{ item.officename ? item.officename : item.district }}
+                {{ item.title }}
               </div>
               <div class="text-xs text-zinc-500 truncate">
-                {{ item.district }}, {{ item.statename }}
+                {{ item.subtitle }}
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-2 shrink-0 ml-3">
-            <span class="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-sky-100 text-sky-800">
-              {{ item.pincode }}
+            <!-- State badge -->
+            <span
+              v-if="item.type === 'state'"
+              class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-indigo-100 text-indigo-800"
+            >
+              State
             </span>
-            <span v-if="item.delivery" class="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded" :class="item.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'">
-              {{ item.delivery === 'Delivery' ? 'Delivery' : 'Non-Del' }}
+            <!-- District badge -->
+            <span
+              v-else-if="item.type === 'district'"
+              class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-amber-100 text-amber-800"
+            >
+              District
+            </span>
+            <!-- PIN Code badge -->
+            <span
+              v-else-if="item.pincode"
+              class="px-2.5 py-1 text-xs font-mono font-bold rounded-md bg-sky-100 text-sky-800"
+            >
+              {{ item.pincode }}
             </span>
           </div>
         </button>

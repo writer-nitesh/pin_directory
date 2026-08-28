@@ -17,6 +17,7 @@ const cityName = computed(() => data.value.cityName)
 const statename = computed(() => data.value.statename)
 const pincodes = computed(() => data.value.pincodes)
 const offices = computed(() => data.value.offices)
+const deliveryOfficesCount = computed(() => data.value?.deliveryOfficesCount || offices.value.filter((o: any) => o.delivery === 'Delivery').length)
 
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/city/${cityParam.value}/pincodes`)
@@ -65,13 +66,13 @@ const filteredPincodes = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
 
     <!-- City Hero -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <div class="flex items-center gap-2 mb-1">
         <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
           City Postal Directory
@@ -79,7 +80,7 @@ const filteredPincodes = computed(() => {
         <span class="text-xs text-zinc-600">• {{ statename }}</span>
       </div>
 
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
         {{ cityName }} PIN Codes
       </h1>
       <p class="text-sm sm:text-base text-zinc-600 max-w-3xl">
@@ -87,23 +88,23 @@ const filteredPincodes = computed(() => {
       </p>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">Total PIN Codes</span>
           <span class="text-xl sm:text-2xl font-extrabold text-sky-600 font-mono">{{ pincodes.length }}</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center">
           <span class="text-xs text-zinc-500 block">State</span>
           <span class="text-base sm:text-lg font-bold text-zinc-900 truncate block">{{ statename }}</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 text-center col-span-2 sm:col-span-1">
-          <span class="text-xs text-zinc-500 block">Delivery Available</span>
-          <span class="text-base sm:text-lg font-bold text-emerald-600">Yes (All Zones)</span>
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100 text-center col-span-2 sm:col-span-1">
+          <span class="text-xs text-zinc-500 block">Delivery Post Offices</span>
+          <span class="text-base sm:text-lg font-bold text-emerald-600 font-mono">{{ deliveryOfficesCount }} Available</span>
         </div>
       </div>
     </div>
 
     <!-- PIN Grid -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 class="text-xl font-bold text-zinc-900 tracking-tight">PIN Codes in {{ cityName }}</h2>
@@ -115,7 +116,7 @@ const filteredPincodes = computed(() => {
             v-model="filterQuery"
             type="text"
             placeholder="Filter PIN codes..."
-            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-md border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
@@ -125,7 +126,7 @@ const filteredPincodes = computed(() => {
           v-for="pin in filteredPincodes"
           :key="pin.pincode"
           :to="`/pincode/${pin.pincode}`"
-          class="p-3 rounded-xl bg-zinc-50 border border-zinc-200 hover:border-sky-400 hover:bg-sky-50 transition text-center group"
+          class="p-3 rounded-md bg-zinc-50 border border-zinc-200 hover:border-sky-400 hover:bg-sky-50 transition text-center group"
         >
           <div class="text-base font-extrabold font-mono text-zinc-900 group-hover:text-sky-600">
             {{ pin.pincode }}
@@ -140,7 +141,7 @@ const filteredPincodes = computed(() => {
     <AdSlot placement="in-content" />
 
     <!-- Popular Post Offices in City -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <h2 class="text-xl font-bold text-zinc-900 tracking-tight">Key Post Offices in {{ cityName }}</h2>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs sm:text-sm">
@@ -148,7 +149,6 @@ const filteredPincodes = computed(() => {
             <tr>
               <th class="py-3 px-4">Post Office</th>
               <th class="py-3 px-4">PIN Code</th>
-              <th class="py-3 px-4">Branch Type</th>
               <th class="py-3 px-4">Delivery</th>
             </tr>
           </thead>
@@ -163,11 +163,6 @@ const filteredPincodes = computed(() => {
                 <NuxtLink :to="`/pincode/${po.pincode}`" class="hover:underline">
                   {{ po.pincode }}
                 </NuxtLink>
-              </td>
-              <td class="py-3 px-4">
-                <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-zinc-100 text-zinc-700">
-                  {{ po.officetype || 'PO' }}
-                </span>
               </td>
               <td class="py-3 px-4">
                 <span

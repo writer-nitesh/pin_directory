@@ -3,6 +3,10 @@
 
 :root {
   --color-primary: #0284c7;
+  --ui-text-highlighted: #18181b;
+  --ui-text-muted: #71717a;
+  --ui-bg-elevated: #f4f4f5;
+  color-scheme: light;
 }
 
 body {
@@ -11,4 +15,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f8fafc;
   color: #0f172a;
+}
+
+/* Ensure article markdown headings and text are always crisp and legible */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: #18181b !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.prose p, .prose li {
+  color: #3f3f46;
+}
+
+.prose strong {
+  color: #18181b;
+}
+
+.prose a {
+  color: #0284c7;
 }

@@ -74,7 +74,7 @@ export function getPincodeDetails(code: string) {
   if (!summary) return null
 
   const offices = db.prepare<[string], PostOffice>(
-    'SELECT * FROM post_offices WHERE pincode = ? ORDER BY delivery DESC, officename ASC'
+    "SELECT * FROM post_offices WHERE pincode = ? ORDER BY CASE WHEN delivery = 'Delivery' THEN 0 ELSE 1 END, officename ASC"
   ).all(code)
 
   // Find nearby/sibling pincodes in same district
@@ -89,30 +89,97 @@ export function getPincodeDetails(code: string) {
   }
 }
 
-export function searchPincodes(query: string, limit = 8) {
+export function searchPincodes(query: string, limit = 10) {
   const db = getDb()
   const cleanQ = query.trim()
   if (!cleanQ) return []
 
   // If query is numeric, search pincode prefix
   if (/^\d+$/.test(cleanQ)) {
-    return db.prepare<[string, number], any>(
+    const pincodes = db.prepare<[string, number], any>(
       `SELECT pincode, district, statename, office_count, primary_offices
        FROM pincodes_summary
        WHERE pincode LIKE ?
        ORDER BY pincode ASC
        LIMIT ?`
     ).all(`${cleanQ}%`, limit)
+
+    return pincodes.map((p) => ({
+      type: 'pincode',
+      title: p.pincode,
+      subtitle: `${p.district}, ${p.statename} • ${p.office_count} Office${p.office_count > 1 ? 's' : ''}`,
+      path: `/pincode/${p.pincode}`,
+      pincode: p.pincode,
+      district: p.district,
+      statename: p.statename,
+    }))
   }
 
-  // Otherwise search office names, districts, or states
   const wildcard = `%${cleanQ}%`
-  return db.prepare<[string, string, string, number], any>(
-    `SELECT DISTINCT pincode, officename, district, statename, officetype, delivery
+  const prefix = `${cleanQ}%`
+
+  // 1. Search States
+  const states = db.prepare<[string, string], any>(
+    `SELECT state_slug, statename, district_count, pincode_count
+     FROM states
+     WHERE statename LIKE ?
+     ORDER BY CASE WHEN statename LIKE ? THEN 1 ELSE 2 END, statename ASC
+     LIMIT 3`
+  ).all(wildcard, prefix)
+
+  const stateResults = states.map((s) => ({
+    type: 'state',
+    title: s.statename,
+    subtitle: `State • ${s.district_count} Districts, ${s.pincode_count} PIN Codes`,
+    path: `/state/${s.state_slug}/pincodes`,
+    statename: s.statename,
+    slug: s.state_slug,
+  }))
+
+  // 2. Search Districts
+  const districts = db.prepare<[string, string], any>(
+    `SELECT district_slug, district, statename, state_slug, pincode_count
+     FROM districts
+     WHERE district LIKE ?
+     ORDER BY CASE WHEN district LIKE ? THEN 1 ELSE 2 END, district ASC
+     LIMIT 4`
+  ).all(wildcard, prefix)
+
+  const districtResults = districts.map((d) => ({
+    type: 'district',
+    title: d.district,
+    subtitle: `District in ${d.statename} • ${d.pincode_count} PIN Codes`,
+    path: `/district/${d.district_slug}/pincodes`,
+    district: d.district,
+    statename: d.statename,
+    slug: d.district_slug,
+  }))
+
+  // 3. Search Post Offices & Area Names
+  const remainingLimit = Math.max(limit - stateResults.length - districtResults.length, 5)
+  const offices = db.prepare<[string, string, string, number], any>(
+    `SELECT DISTINCT pincode, officename, office_slug, district, statename, officetype, delivery
      FROM post_offices
-     WHERE officename LIKE ? OR district LIKE ? OR statename LIKE ?
+     WHERE officename LIKE ? OR district LIKE ?
+     ORDER BY CASE WHEN officename LIKE ? THEN 1 ELSE 2 END, officename ASC
      LIMIT ?`
-  ).all(wildcard, wildcard, wildcard, limit)
+  ).all(wildcard, wildcard, prefix, remainingLimit)
+
+  const officeResults = offices.map((o) => ({
+    type: 'office',
+    title: o.officename,
+    subtitle: `${o.pincode} • ${o.district}, ${o.statename}`,
+    path: `/pincode/${o.pincode}`,
+    officename: o.officename,
+    office_slug: o.office_slug,
+    pincode: o.pincode,
+    district: o.district,
+    statename: o.statename,
+    delivery: o.delivery,
+    officetype: o.officetype,
+  }))
+
+  return [...stateResults, ...districtResults, ...officeResults]
 }
 
 export function getAllStates() {

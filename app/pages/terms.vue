@@ -6,12 +6,12 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto space-y-6 bg-white border border-zinc-200 rounded-2xl p-6 sm:p-10 shadow-xs">
+  <div class="max-w-4xl mx-auto space-y-6 bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs">
     <div class="border-b border-zinc-100 pb-4">
       <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
         Terms of Use
       </span>
-      <h1 class="text-3xl font-extrabold text-zinc-900 tracking-tight mt-2">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mt-2">
         Terms & Conditions
       </h1>
     </div>

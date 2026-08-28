@@ -58,45 +58,75 @@ useSchemaOrg([
     },
     geo: office.value.latitude && office.value.longitude
       ? {
-          '@type': 'GeoCoordinates',
-          latitude: office.value.latitude,
-          longitude: office.value.longitude,
-        }
+        '@type': 'GeoCoordinates',
+        latitude: office.value.latitude,
+        longitude: office.value.longitude,
+      }
       : undefined,
   }),
 ])
+
+// Copy to Clipboard Feedback
+const isCopied = ref(false)
+const copyPin = async () => {
+  try {
+    await navigator.clipboard.writeText(office.value.pincode)
+    isCopied.value = true
+    setTimeout(() => {
+      isCopied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy', err)
+  }
+}
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <BreadcrumbNav :items="breadcrumbs" />
 
     <AdSlot placement="header-leaderboard" />
 
     <!-- Hero Card -->
-    <div class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-100 pb-6">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
-              Post Office Branch
+              Post Office
             </span>
             <span class="text-xs text-zinc-600">• {{ office.statename }}</span>
           </div>
-          <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">
             {{ office.officename }}
           </h1>
-          <p class="text-sm text-zinc-500 mt-1">
-            PIN Code: <NuxtLink :to="`/pincode/${office.pincode}`" class="font-mono font-bold text-sky-600 hover:underline">{{ office.pincode }}</NuxtLink>
-            • {{ office.district }} District, {{ office.statename }}
+          <p class="text-sm text-zinc-500 mt-1 flex items-center gap-1.5 flex-wrap">
+            <span>PIN Code:</span>
+            <NuxtLink :to="`/pincode/${office.pincode}`" class="font-mono font-bold text-sky-600 hover:underline">{{
+              office.pincode }}</NuxtLink>
+            <button type="button"
+              class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded transition font-medium"
+              :class="isCopied ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'"
+              title="Copy PIN Code" @click="copyPin">
+              <UIcon :name="isCopied ? 'i-heroicons-check' : 'i-heroicons-clipboard-document'" class="w-3.5 h-3.5" />
+              <span>{{ isCopied ? 'Copied' : 'Copy' }}</span>
+            </button>
+            <span>• {{ office.district }} District, {{ office.statename }}</span>
           </p>
         </div>
 
-        <div class="flex items-center gap-2">
-          <NuxtLink
-            :to="`/pincode/${office.pincode}`"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm bg-sky-600 text-white hover:bg-sky-700 transition"
-          >
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Copy PIN Button -->
+          <button type="button"
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md font-semibold text-sm transition shadow-xs"
+            :class="isCopied ? 'bg-emerald-600 text-white' : 'bg-white border border-zinc-300 text-zinc-800 hover:border-sky-500 hover:text-sky-600'"
+            @click="copyPin">
+            <UIcon :name="isCopied ? 'i-heroicons-check' : 'i-heroicons-clipboard-document'" class="w-4 h-4" />
+            <span>{{ isCopied ? 'Copied!' : 'Copy PIN Code' }}</span>
+          </button>
+
+          <NuxtLink :to="`/pincode/${office.pincode}`"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-sm bg-sky-600 text-white hover:bg-sky-700 transition shadow-xs">
             <UIcon name="i-heroicons-map-pin" class="w-4 h-4" />
             <span>View All in {{ office.pincode }}</span>
           </NuxtLink>
@@ -105,29 +135,28 @@ useSchemaOrg([
 
       <!-- Details Table Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm">
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">Branch Type</span>
-          <span class="font-bold text-zinc-900 font-mono">{{ office.officetype }} ({{ office.officetype === 'BO' ? 'Branch Office' : office.officetype === 'SO' ? 'Sub Office' : 'Head Office' }})</span>
+          <span class="font-bold text-zinc-900 font-mono">{{ office.officetype }} ({{ office.officetype === 'BO' ?
+            'Branch Office' : office.officetype === 'SO' ? 'Sub Office' : 'Head Office' }})</span>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">Delivery Status</span>
-          <span
-            class="text-xs font-bold px-2 py-0.5 rounded-full inline-block mt-0.5"
-            :class="office.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'"
-          >
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full inline-block mt-0.5"
+            :class="office.delivery === 'Delivery' ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-200 text-zinc-700'">
             {{ office.delivery }}
           </span>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
           <span class="text-zinc-600 block text-xs">Postal Division</span>
           <span class="font-bold text-zinc-900">{{ office.division || 'General' }}</span>
         </div>
 
-        <div class="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100">
-          <span class="text-zinc-600 block text-xs">Postal Region</span>
-          <span class="font-bold text-zinc-900">{{ office.region || 'India Post' }}</span>
+        <div class="p-3.5 rounded-md bg-zinc-50 border border-zinc-100">
+          <span class="text-zinc-600 block text-xs">Postal Circle</span>
+          <span class="font-bold text-zinc-900">{{ office.circle || office.statename }}</span>
         </div>
       </div>
     </div>
@@ -135,17 +164,14 @@ useSchemaOrg([
     <AdSlot placement="in-content" />
 
     <!-- Sibling Post Offices -->
-    <div v-if="siblingOffices.length > 0" class="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-4">
+    <div v-if="siblingOffices.length > 0"
+      class="bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs space-y-4">
       <h2 class="text-lg font-bold text-zinc-900 tracking-tight">
         Other Post Offices under PIN Code {{ office.pincode }}
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <NuxtLink
-          v-for="sib in siblingOffices"
-          :key="sib.id"
-          :to="`/post-office/${sib.office_slug}`"
-          class="p-3.5 rounded-xl border border-zinc-200 hover:border-sky-300 hover:bg-sky-50/30 transition flex items-center justify-between group"
-        >
+        <NuxtLink v-for="sib in siblingOffices" :key="sib.id" :to="`/post-office/${sib.office_slug}`"
+          class="p-3.5 rounded-md border border-zinc-200 hover:border-sky-300 hover:bg-sky-50/30 transition flex items-center justify-between group">
           <div>
             <div class="font-semibold text-xs sm:text-sm text-zinc-900 group-hover:text-sky-600 transition">
               {{ sib.officename }}

@@ -6,12 +6,12 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto space-y-6 bg-white border border-zinc-200 rounded-2xl p-6 sm:p-10 shadow-xs">
+  <div class="max-w-4xl mx-auto space-y-6 bg-white border border-zinc-200 rounded-md p-6 sm:p-8 shadow-xs">
     <div class="border-b border-zinc-100 pb-4">
       <span class="text-xs font-semibold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded">
         About Pin Directory
       </span>
-      <h1 class="text-3xl font-extrabold text-zinc-900 tracking-tight mt-2">
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mt-2">
         About Pin Directory
       </h1>
     </div>
@@ -26,12 +26,12 @@ useSeoMeta({
         Finding accurate postal addresses in India has historically required navigating slow, cluttered government portals or ad-stuffed directories. Our goal is to provide a clean, minimalist, lightning-fast search engine that answers your query directly without unnecessary friction.
       </p>
 
-      <h2 class="text-lg font-bold text-zinc-900 pt-2">Data Source & Attribution</h2>
+      <h2 class="text-lg font-bold text-zinc-900 pt-2">Comprehensive Postal Coverage</h2>
       <p>
-        The postal data displayed across Pin Directory is derived from official open government records provided by the <strong>Department of Posts, Ministry of Communications, Government of India</strong> via the <strong>Open Government Data (OGD) Platform India (<a href="https://data.gov.in" target="_blank" rel="noopener" class="text-sky-600 underline">data.gov.in</a>)</strong>.
+        Pin Directory indexes over 19,500 active 6-digit postal index numbers and more than 165,000 post offices spanning all 37 states and union territories in India, offering comprehensive geographical and postal division mappings.
       </p>
-      <p class="text-xs text-zinc-500 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
-        <em>Disclaimer:</em> Pin Directory is an independent educational and informational service and is not affiliated, endorsed by, or directly associated with India Post or the Government of India.
+      <p class="text-xs text-zinc-500 bg-zinc-50 p-4 rounded-md border border-zinc-200">
+        <em>Disclaimer:</em> Pin Directory is an independent informational directory and search platform created for convenience and educational purposes.
       </p>
     </div>
   </div>
