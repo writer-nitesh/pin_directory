@@ -1,7 +1,23 @@
 <script setup lang="ts">
+const config = useRuntimeConfig()
+
+const title = 'About Pin Directory — Indian PIN Code & Postal Code Search Engine'
+const description = 'Pin Directory is a fast, free Indian postal code directory. We index 19,500+ PIN codes and 165,000+ post offices across all 37 states of India using official India Post data.'
+
 useSeoMeta({
-  title: 'About Us - Pin Directory India',
-  description: 'Learn about Pin Directory, the modern programmatic search engine for Indian postal index numbers and post offices.',
+  title,
+  ogTitle: title,
+  description,
+  ogDescription: description,
+  ogType: 'website',
+  ogUrl: `${config.public.siteUrl}/about`,
+  twitterCard: 'summary',
+  twitterTitle: title,
+  twitterDescription: description,
+})
+
+useHead({
+  link: [{ rel: 'canonical', href: `${config.public.siteUrl}/about` }],
 })
 </script>
 
@@ -30,9 +46,28 @@ useSeoMeta({
       <p>
         Pin Directory indexes over 19,500 active 6-digit postal index numbers and more than 165,000 post offices spanning all 37 states and union territories in India, offering comprehensive geographical and postal division mappings.
       </p>
+
+      <h2 class="text-lg font-bold text-zinc-900 pt-2">Data Sources & Accuracy</h2>
+      <p>
+        Our postal data is sourced from the official <a href="https://www.indiapost.gov.in" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:underline">India Post (Department of Posts)</a> directory and the <a href="https://data.gov.in/resource/all-india-pincode-directory-till-last-month" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:underline">Government of India Open Data Portal (data.gov.in)</a>. We cross-reference multiple datasets to ensure accuracy.
+      </p>
+      <p>
+        For the most authoritative and official PIN code lookup, you can also visit the <a href="http://www.indiapost.gov.in/VAS/Pages/FindPincode.aspx" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:underline">India Post PIN Code Search</a> directly.
+      </p>
+
+      <h2 class="text-lg font-bold text-zinc-900 pt-2">Features</h2>
+      <ul class="list-disc list-inside space-y-1 text-sm text-zinc-700">
+        <li>Instant PIN code lookup by area, city, or 6-digit code</li>
+        <li>GPS-based <NuxtLink to="/find-my-pincode" class="text-sky-600 hover:underline">Find My PIN Code</NuxtLink> tool</li>
+        <li>Complete state-wise and district-wise directories</li>
+        <li>Post office delivery status and division information</li>
+        <li>Nearby PIN codes for every postal area</li>
+      </ul>
+
       <p class="text-xs text-zinc-500 bg-zinc-50 p-4 rounded-md border border-zinc-200">
-        <em>Disclaimer:</em> Pin Directory is an independent informational directory and search platform created for convenience and educational purposes.
+        <em>Disclaimer:</em> Pin Directory is an independent informational directory and search platform created for convenience and educational purposes. Data is sourced from publicly available India Post records.
       </p>
     </div>
   </div>
 </template>
+

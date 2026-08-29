@@ -110,7 +110,10 @@ export default defineNuxtConfig({
       type: "Organization",
       name: "Pin Directory",
       url: process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in",
-      logo: "/favicon.ico",
+      logo: `${process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in"}/favicon.ico`,
+      sameAs: [
+        "https://en.wikipedia.org/wiki/Postal_Index_Number",
+      ],
     },
   },
 
@@ -118,6 +121,17 @@ export default defineNuxtConfig({
     sources: ["/api/sitemap-urls"],
     exclude: ["/search", "/_scripts/**", "/_studio/**"],
     defaults: { changefreq: "weekly", priority: 0.7 },
+    // Override priorities for key sections
+    urls: [
+      { loc: "/", priority: 1.0, changefreq: "daily" },
+      { loc: "/states", priority: 0.9, changefreq: "weekly" },
+      { loc: "/find-my-pincode", priority: 0.9, changefreq: "monthly" },
+      { loc: "/guides/what-is-a-pincode", priority: 0.8, changefreq: "monthly" },
+      { loc: "/guides/how-india-pincodes-work", priority: 0.8, changefreq: "monthly" },
+      { loc: "/guides/pincode-format-zones", priority: 0.8, changefreq: "monthly" },
+      { loc: "/guides/find-pincode-by-address", priority: 0.8, changefreq: "monthly" },
+      { loc: "/guides/post-office-near-me", priority: 0.8, changefreq: "monthly" },
+    ],
   },
 
   robots: {
@@ -146,8 +160,8 @@ export default defineNuxtConfig({
 
   llms: {
     domain: process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in",
-    title: "Pin Directory",
-    description: "Indian Postal Code and Post Office Directory",
+    title: "Pin Directory — Indian PIN Code & Postal Code Finder",
+    description: "Free Indian postal code (PIN code) directory with 19,500+ PIN codes, 165,000+ post offices, and GPS-based location detection. Browse by state, district, or city across all 37 Indian states and union territories.",
     contentRawMarkdown: {
       excludeCollections: [],
       rewriteLLMSTxt: false,

@@ -35,6 +35,10 @@ useSeoMeta({
   description: pageDescription,
   ogDescription: pageDescription,
   ogType: 'article',
+  ogUrl: canonicalUrl,
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
 })
 
 // Canonical Link Tag
@@ -51,7 +55,7 @@ const breadcrumbs = computed(() => summary.value ? [
   { name: code.value, path: `/pincode/${code.value}` },
 ] : [])
 
-// Structured Data / Schema Markup: Place & PostalAddress
+// Structured Data / Schema Markup: Place & PostalAddress + ItemList for post offices
 useSchemaOrg([
   definePlace({
     name: `PIN Code ${code.value}`,
@@ -70,6 +74,16 @@ useSchemaOrg([
         }
       : undefined),
   }),
+  computed(() => offices.value.length > 0 ? ({
+    '@type': 'ItemList',
+    name: `Post Offices under PIN Code ${code.value}`,
+    itemListElement: offices.value.map((office: any, idx: number) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: office.officename,
+      url: `${config.public.siteUrl}/post-office/${office.office_slug}`,
+    })),
+  }) : undefined) as any,
 ])
 
 // Copy to Clipboard Feedback
@@ -249,6 +263,43 @@ const faqs = computed(() => summary.value ? [
 
     <!-- Data-Driven FAQs Section with FAQPage Schema -->
     <FaqSection :faqs="faqs" :title="`Frequently Asked Questions about PIN Code ${code}`" />
+
+    <!-- External Authority Link + Related Guides -->
+    <div class="bg-white border border-zinc-200 rounded-md p-6 shadow-xs space-y-4">
+      <h2 class="text-base font-bold text-zinc-900 tracking-tight">More Postal Resources</h2>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <a
+          href="http://www.indiapost.gov.in/VAS/Pages/FindPincode.aspx"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-zinc-200 hover:border-sky-300 text-xs font-semibold text-zinc-700 hover:text-sky-600 transition bg-zinc-50"
+        >
+          <UIcon name="i-heroicons-arrow-top-right-on-square" class="w-3.5 h-3.5" />
+          Verify on Official India Post
+        </a>
+        <NuxtLink
+          to="/guides/what-is-a-pincode"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-zinc-200 hover:border-sky-300 text-xs font-semibold text-zinc-700 hover:text-sky-600 transition bg-zinc-50"
+        >
+          <UIcon name="i-heroicons-book-open" class="w-3.5 h-3.5" />
+          What is a PIN Code?
+        </NuxtLink>
+        <NuxtLink
+          to="/guides/how-india-pincodes-work"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-zinc-200 hover:border-sky-300 text-xs font-semibold text-zinc-700 hover:text-sky-600 transition bg-zinc-50"
+        >
+          <UIcon name="i-heroicons-book-open" class="w-3.5 h-3.5" />
+          How PIN Codes Work
+        </NuxtLink>
+        <NuxtLink
+          to="/find-my-pincode"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-sky-100 hover:border-sky-300 text-xs font-semibold text-sky-700 hover:text-sky-800 transition bg-sky-50"
+        >
+          <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5" />
+          Find My PIN Code (GPS)
+        </NuxtLink>
+      </div>
+    </div>
 
     <!-- Bottom Ad Slot -->
     <AdSlot placement="bottom-banner" />

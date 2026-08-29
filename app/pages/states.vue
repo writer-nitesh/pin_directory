@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 
-// SEO Meta
-const title = 'All India PIN Codes by State - 37 States & Union Territories'
-const description = 'Browse Indian postal PIN codes across all 37 states and union territories. Explore 750+ districts and 165,000+ post offices in India.'
+// SEO Meta — targets "all india pin codes by state", "postal code india", "pin code list"
+const title = 'All India PIN Codes by State — 37 States & Union Territories Directory'
+const description = 'Browse complete Indian postal PIN code lists across all 37 states and union territories. Explore 750+ districts, 19,500+ postal codes, and 165,000+ post offices. Find any India Post pin code by state or district.'
 
 useSeoMeta({
   title,
@@ -11,11 +11,30 @@ useSeoMeta({
   description,
   ogDescription: description,
   ogType: 'website',
+  ogUrl: `${config.public.siteUrl}/states`,
+  twitterCard: 'summary_large_image',
+  twitterTitle: title,
+  twitterDescription: description,
 })
 
 useHead({
   link: [{ rel: 'canonical', href: `${config.public.siteUrl}/states` }],
 })
+
+// CollectionPage + BreadcrumbList schema
+useSchemaOrg([
+  {
+    '@type': 'CollectionPage',
+    name: 'All India PIN Codes by State',
+    url: `${config.public.siteUrl}/states`,
+    description: 'Directory of Indian PIN codes organised by state and union territory.',
+    publisher: {
+      '@type': 'Organization',
+      name: 'Pin Directory',
+      url: config.public.siteUrl,
+    },
+  },
+])
 
 const { data } = await useFetch('/api/states')
 const states = computed(() => data.value?.states || [])
@@ -30,7 +49,28 @@ const filteredStates = computed(() => {
 const breadcrumbs = [
   { name: 'States', path: '/states' },
 ]
+
+// FAQs for states page
+const stateFaqs = [
+  {
+    question: 'How many states and union territories have PIN codes in India?',
+    answer: 'All 37 states and union territories in India have postal PIN codes assigned by India Post. This includes 28 states and 9 union territories, each divided into postal circles and districts.',
+  },
+  {
+    question: 'How many total PIN codes are there in India across all states?',
+    answer: 'There are over 19,500 active 6-digit postal PIN codes in India, covering all states and union territories, and serving more than 165,000 post offices nationwide.',
+  },
+  {
+    question: 'Which Indian state has the most PIN codes?',
+    answer: 'Uttar Pradesh has the highest number of PIN codes among all Indian states, followed by Maharashtra and Rajasthan. Large states with dense populations tend to have more postal delivery offices and corresponding PIN codes.',
+  },
+  {
+    question: 'What is the PIN code format for Delhi?',
+    answer: 'Delhi PIN codes start with "11" — the first digit "1" indicates the Northern postal zone, and the second digit "1" specifies the National Capital Territory. Delhi PIN codes range from 110001 (New Delhi GPO) up to 110096.',
+  },
+]
 </script>
+
 
 <template>
   <div class="space-y-6 sm:space-y-8">
@@ -95,6 +135,11 @@ const breadcrumbs = [
       </NuxtLink>
     </div>
 
+
     <AdSlot placement="in-content" />
+
+    <!-- FAQ Section -->
+    <FaqSection :faqs="stateFaqs" title="Frequently Asked Questions about India PIN Codes by State" />
   </div>
 </template>
+

@@ -22,10 +22,10 @@ const topPincodes = computed(() => data.value?.topPincodes || [])
 // Canonical URL
 const canonicalUrl = computed(() => `${config.public.siteUrl}/state/${stateSlug.value}/pincodes`)
 
-// SEO Meta
-const title = computed(() => state.value ? `${state.value.statename} PIN Code List - Districts & Postal Codes` : '')
+// SEO Meta — enriched with state-specific counts and keywords
+const title = computed(() => state.value ? `${state.value.statename} PIN Code List — ${state.value.district_count} Districts & Postal Codes` : '')
 const description = computed(
-  () => state.value ? `Comprehensive list of PIN codes and post offices in ${state.value.statename}. Browse ${state.value.district_count} districts, ${state.value.pincode_count} postal codes, and ${state.value.office_count} post offices.` : ''
+  () => state.value ? `Complete PIN code directory for ${state.value.statename}. Browse ${state.value.district_count} districts, ${state.value.pincode_count} postal codes (postal codes), and ${state.value.office_count} post offices. Find any 6-digit India Post PIN code in ${state.value.statename}.` : ''
 )
 
 useSeoMeta({
@@ -34,17 +34,52 @@ useSeoMeta({
   description,
   ogDescription: description,
   ogType: 'article',
+  ogUrl: canonicalUrl,
+  twitterCard: 'summary_large_image',
+  twitterTitle: title,
+  twitterDescription: description,
 })
 
 useHead({
   link: [{ rel: 'canonical', href: canonicalUrl }],
 })
 
+// CollectionPage schema for state page
+useSchemaOrg([
+  computed(() => state.value ? ({
+    '@type': 'CollectionPage',
+    name: `${state.value.statename} PIN Codes`,
+    url: canonicalUrl.value,
+    description: `Complete listing of ${state.value.pincode_count} postal PIN codes across ${state.value.district_count} districts of ${state.value.statename}, India.`,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Pin Directory',
+      url: config.public.siteUrl,
+    },
+  }) : undefined) as any,
+])
+
 // Breadcrumbs
 const breadcrumbs = computed(() => [
   { name: 'States', path: '/states' },
   ...(state.value ? [{ name: state.value.statename, path: `/state/${stateSlug.value}/pincodes` }] : []),
 ])
+
+// State-specific FAQs
+const stateFaqs = computed(() => state.value ? [
+  {
+    question: `How many PIN codes are there in ${state.value.statename}?`,
+    answer: `${state.value.statename} has ${state.value.pincode_count} active 6-digit postal PIN codes spread across ${state.value.district_count} districts, served by ${state.value.office_count} post offices.`,
+  },
+  {
+    question: `How do I find the PIN code of an area in ${state.value.statename}?`,
+    answer: `Select your district from the list below to view all its PIN codes and post offices. You can also use the search bar above to enter an area name or city in ${state.value.statename} for instant PIN code lookup.`,
+  },
+  {
+    question: `How many districts are there in ${state.value.statename} for postal purposes?`,
+    answer: `${state.value.statename} has ${state.value.district_count} postal districts. Each district has its own set of PIN codes assigned by India Post for efficient mail sorting and delivery.`,
+  },
+] : [])
 
 // Filter districts
 const searchQuery = ref('')
@@ -146,5 +181,8 @@ const filteredDistricts = computed(() => {
         </NuxtLink>
       </div>
     </div>
+
+    <!-- State FAQ Section -->
+    <FaqSection v-if="stateFaqs.length" :faqs="stateFaqs" :title="`Frequently Asked Questions about ${state?.statename} PIN Codes`" />
   </div>
 </template>

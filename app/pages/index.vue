@@ -16,6 +16,45 @@ const recentSearches = computed(() => recentSearchesStore.history)
 const { data: statesData } = await useFetch('/api/states')
 const states = computed(() => statesData.value?.states || [])
 
+// SEO Meta — primary keyword: "pin code", secondary: "postal code india", "pincode search"
+const pageTitle = 'PIN Code India — Postal Code & Post Office Finder | Pin Directory'
+const pageDescription = 'Search any Indian PIN code (postal code) instantly. Find post offices, delivery status, districts, and 6-digit postal codes across all 37 states in India. 19,500+ PIN codes & 165,000+ post offices.'
+
+useSeoMeta({
+  title: pageTitle,
+  ogTitle: pageTitle,
+  description: pageDescription,
+  ogDescription: pageDescription,
+  ogType: 'website',
+  ogUrl: config.public.siteUrl,
+  ogImage: `${config.public.siteUrl}/og-image.png`,
+  twitterCard: 'summary_large_image',
+  twitterTitle: pageTitle,
+  twitterDescription: pageDescription,
+})
+
+useHead({
+  link: [{ rel: 'canonical', href: config.public.siteUrl }],
+})
+
+// WebSite schema with SearchAction for Google Sitelinks Searchbox
+useSchemaOrg([
+  {
+    '@type': 'WebSite',
+    name: 'Pin Directory',
+    url: config.public.siteUrl,
+    description: 'Indian postal code directory — find PIN codes, post offices, and delivery areas across all 37 states.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${config.public.siteUrl}/search?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+])
+
 const popularCities = [
   { name: 'Delhi', slug: 'delhi', count: '90+ PIN Codes' },
   { name: 'Bangalore', slug: 'bangalore', count: '120+ PIN Codes' },
@@ -31,6 +70,7 @@ const popularCities = [
   { name: 'Indore', slug: 'indore', count: '45+ PIN Codes' },
 ]
 
+// Expanded FAQs targeting People Also Ask & related searches
 const homeFaqs = [
   {
     question: 'How do I find the PIN code of my current location?',
@@ -44,6 +84,27 @@ const homeFaqs = [
     question: 'How many PIN codes are there in India?',
     answer: 'There are over 19,500 active PIN codes serving more than 165,000 post offices across 37 states and union territories in India.',
   },
+  {
+    question: 'Is a PIN code the same as a postal code in India?',
+    answer: 'Yes. In India, the terms PIN code, postal code, and ZIP code all refer to the same thing — a 6-digit Postal Index Number (PIN) assigned by India Post to identify geographic sorting districts and delivery offices.',
+  },
+  {
+    question: 'How do I find the nearest post office to my location?',
+    answer: 'Use our GPS-based Find My PIN Code tool. It detects your current coordinates and returns the nearest post office, its PIN code, district, and state. You can also search by city, area name, or enter any 6-digit PIN code directly.',
+  },
+  {
+    question: 'What is the first digit of an Indian PIN code?',
+    answer: 'The first digit of a 6-digit Indian PIN code represents the postal zone: Zone 1 (Delhi, Punjab, Haryana), Zone 2 (Uttar Pradesh, Uttarakhand), Zone 3 (Rajasthan, Gujarat), Zone 4 (Maharashtra, Goa), Zone 5 (Karnataka, Andhra Pradesh), Zone 6 (Tamil Nadu, Kerala), Zone 7 (West Bengal, North East), Zone 8 (Bihar, Jharkhand), Zone 9 (Army Postal Service).',
+  },
+]
+
+// Internal linking — Postal guides
+const postalGuides = [
+  { title: 'What is a PIN Code?', slug: 'what-is-a-pincode', desc: 'Complete guide to Indian Postal Index Numbers.' },
+  { title: 'How PIN Codes Work', slug: 'how-india-pincodes-work', desc: 'Anatomy of the 6-digit structure, zones & sub-zones.' },
+  { title: 'Postal Zones Explained', slug: 'pincode-format-zones', desc: 'All 9 postal zones and states they cover.' },
+  { title: 'Find Pincode by Address', slug: 'find-pincode-by-address', desc: 'Step-by-step guide to locating pincode from address.' },
+  { title: 'Nearest Post Office Guide', slug: 'post-office-near-me', desc: 'How to find the closest post office in India.' },
 ]
 </script>
 
@@ -203,7 +264,31 @@ const homeFaqs = [
       </div>
     </section>
 
+
+    <!-- Postal Guides — Internal Linking Section -->
+    <section class="space-y-4">
+      <div class="border-b border-zinc-200 pb-3">
+        <h2 class="text-xl font-bold text-zinc-900 tracking-tight">Postal Guides & Resources</h2>
+        <p class="text-xs text-zinc-500">Learn how India's postal system works and how to find PIN codes</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <NuxtLink
+          v-for="guide in postalGuides"
+          :key="guide.slug"
+          :to="`/guides/${guide.slug}`"
+          class="p-4 rounded-md bg-white border border-zinc-200 hover:border-sky-300 hover:shadow-sm transition group flex items-start gap-3"
+        >
+          <UIcon name="i-heroicons-book-open" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+          <div>
+            <div class="font-semibold text-zinc-900 group-hover:text-sky-600 transition text-sm">{{ guide.title }}</div>
+            <div class="text-xs text-zinc-500 mt-0.5">{{ guide.desc }}</div>
+          </div>
+        </NuxtLink>
+      </div>
+    </section>
+
     <!-- FAQs Section -->
     <FaqSection :faqs="homeFaqs" title="Frequently Asked Questions about Indian Postal Codes" />
   </div>
 </template>
+
