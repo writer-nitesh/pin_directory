@@ -1,15 +1,15 @@
 import { getPincodeDetails } from '../../utils/db'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const code = getRouterParam(event, 'code')
   if (!code || !/^\d{6}$/.test(code)) {
     throw createError({
-      statusCode: 404,
-      statusMessage: 'Invalid or missing PIN Code. PIN code must be 6 digits.',
+      statusCode: 400,
+      statusMessage: 'Valid 6-digit PIN code is required',
     })
   }
 
-  const details = getPincodeDetails(code)
+  const details = await getPincodeDetails(code)
   if (!details) {
     throw createError({
       statusCode: 404,

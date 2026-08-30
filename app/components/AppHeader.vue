@@ -1,25 +1,16 @@
 <script setup lang="ts">
 const isMobileMenuOpen = ref(false)
+const { $pwa } = useNuxtApp()
+// alias so template works without $ prefix
+const pwa = $pwa
 </script>
 
 <template>
   <header class="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/95 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <!-- Logo -->
-      <NuxtLink to="/"
-        class="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-md">
-        <div
-          class="w-9 h-9 rounded-md bg-sky-600 flex items-center justify-center text-white shadow-sm group-hover:bg-sky-700 transition">
-          <UIcon name="i-heroicons-map-pin" class="w-5 h-5" />
-        </div>
-        <div class="flex flex-col">
-          <span class="text-lg font-bold tracking-tight text-zinc-900 leading-none flex items-center gap-1.5">
-            Pin Directory
-            <span
-              class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-sky-100 text-sky-800 tracking-wider">India</span>
-          </span>
-          <span class="text-[11px] text-zinc-500 font-medium">Postal Code Search</span>
-        </div>
+      <NuxtLink to="/" class="focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-md">
+        <AppLogo size="lg" show-text show-tagline />
       </NuxtLink>
 
       <!-- Desktop Nav -->
@@ -46,6 +37,12 @@ const isMobileMenuOpen = ref(false)
 
       <!-- Action Button -->
       <div class="hidden md:flex items-center gap-3">
+        <button v-if="pwa?.showInstallPrompt && !pwa?.isPWAInstalled" type="button"
+          class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-md bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-xs"
+          @click="pwa?.install()">
+          <UIcon name="i-heroicons-arrow-down-tray" class="w-4 h-4" />
+          Install App
+        </button>
         <NuxtLink to="/find-my-pincode"
           class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-md bg-sky-600 text-white hover:bg-sky-700 transition shadow-xs">
           <UIcon name="i-heroicons-map-pin" class="w-4 h-4" />

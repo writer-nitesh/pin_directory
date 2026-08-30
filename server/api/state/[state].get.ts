@@ -1,6 +1,6 @@
 import { getStateDetails } from '../../utils/db'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const stateSlug = getRouterParam(event, 'state')
   if (!stateSlug) {
     throw createError({
@@ -9,7 +9,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const details = getStateDetails(stateSlug)
+  const details = await getStateDetails(stateSlug)
   if (!details) {
     throw createError({
       statusCode: 404,

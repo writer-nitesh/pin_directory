@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const nearest = getClosestPincode(lat, lng)
+    const nearest = await getClosestPincode(lat, lng)
     if (!nearest) {
       throw createError({
         statusCode: 404,
@@ -32,10 +32,13 @@ export default defineEventHandler(async (event) => {
   } catch (err: any) {
     // Re-throw H3 errors as-is
     if (err.statusCode) throw err
-    // Wrap unexpected errors with a friendly message
+    // Surface the real error in dev, generic message in prod
+    console.error('[nearby API] Unexpected error:', err)
     throw createError({
       statusCode: 500,
-      statusMessage: 'Could not look up PIN code for your location. Please try the manual search.',
+      statusMessage: process.env.NODE_ENV === 'development'
+        ? `DB error: ${err?.message || String(err)}`
+        : 'Could not look up PIN code for your location. Please try the manual search.',
     })
   }
 })

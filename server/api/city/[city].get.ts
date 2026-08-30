@@ -1,5 +1,3 @@
-import { getDb } from '../../utils/db'
-
 // City aliases and normalization map
 const CITY_MAP: Record<string, string[]> = {
   bangalore: ['bengaluru-urban', 'bangalore-urban', 'bengaluru-rural', 'bangalore'],
@@ -35,29 +33,29 @@ export interface CityApiResponse {
   deliveryOfficesCount: number
 }
 
-export default defineEventHandler((event): CityApiResponse => {
+export default defineEventHandler(async (event): Promise<CityApiResponse> => {
   const citySlug = getRouterParam(event, 'city')?.toLowerCase().trim()
   if (!citySlug) {
     throw createError({ statusCode: 400, statusMessage: 'City slug is required.' })
   }
 
-  const db = getDb()
+  const db = hubDatabase()
   const candidateSlugs = CITY_MAP[citySlug] || [citySlug]
 
   // Find districts matching
   const placeholders = candidateSlugs.map(() => '?').join(',')
-  const districts = db.prepare<string[], any>(
+  const { results: districts } = await db.prepare(
     `SELECT * FROM districts WHERE district_slug IN (${placeholders}) OR district_slug LIKE ?`
-  ).all(...candidateSlugs, `%${citySlug}%`)
+  ).bind(...candidateSlugs, `%${citySlug}%`).all<any>()
 
   let matchedDistrictSlugs = districts.map(d => d.district_slug)
   let statename = districts[0]?.statename || 'India'
 
   // If no district matched directly, try matching by district name or office name
   if (matchedDistrictSlugs.length === 0) {
-    const fromOffices = db.prepare<[string, string], any>(
+    const { results: fromOffices } = await db.prepare(
       'SELECT DISTINCT district_slug, district, statename FROM post_offices WHERE officename LIKE ? OR district LIKE ? LIMIT 5'
-    ).all(`%${citySlug}%`, `%${citySlug}%`)
+    ).bind(`%${citySlug}%`, `%${citySlug}%`).all<any>()
 
     if (fromOffices.length > 0) {
       matchedDistrictSlugs = fromOffices.map(o => o.district_slug)
@@ -74,23 +72,25 @@ export default defineEventHandler((event): CityApiResponse => {
 
   // Fetch all pincodes across the matched districts
   const pinPlaceholders = matchedDistrictSlugs.map(() => '?').join(',')
-  const pincodes = db.prepare<string[], any>(
+  const { results: pincodes } = await db.prepare(
     `SELECT * FROM pincodes_summary WHERE district_slug IN (${pinPlaceholders}) ORDER BY pincode ASC`
-  ).all(...matchedDistrictSlugs)
+  ).bind(...matchedDistrictSlugs).all<any>()
 
   // Fetch post offices prioritizing delivery offices
-  const offices = db.prepare<string[], any>(
+  const { results: offices } = await db.prepare(
     `SELECT * FROM post_offices WHERE district_slug IN (${pinPlaceholders}) ORDER BY CASE WHEN delivery = 'Delivery' THEN 0 ELSE 1 END, officename ASC LIMIT 60`
-  ).all(...matchedDistrictSlugs)
+  ).bind(...matchedDistrictSlugs).all<any>()
 
   // Compute accurate delivery stats
-  const totalOffices = db.prepare<string[], { count: number }>(
+  const totalOfficesRow = await db.prepare(
     `SELECT count(*) as count FROM post_offices WHERE district_slug IN (${pinPlaceholders})`
-  ).get(...matchedDistrictSlugs)?.count || offices.length
+  ).bind(...matchedDistrictSlugs).first<{ count: number }>()
+  const totalOffices = totalOfficesRow?.count || offices.length
 
-  const deliveryOfficesCount = db.prepare<string[], { count: number }>(
+  const deliveryOfficesRow = await db.prepare(
     `SELECT count(*) as count FROM post_offices WHERE district_slug IN (${pinPlaceholders}) AND delivery = 'Delivery'`
-  ).get(...matchedDistrictSlugs)?.count || 0
+  ).bind(...matchedDistrictSlugs).first<{ count: number }>()
+  const deliveryOfficesCount = deliveryOfficesRow?.count || 0
 
   const cityName = citySlug.charAt(0).toUpperCase() + citySlug.slice(1)
 

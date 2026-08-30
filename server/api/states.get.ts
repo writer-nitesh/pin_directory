@@ -1,7 +1,7 @@
 import { getAllStates } from '../utils/db'
 
-export default defineEventHandler(() => {
+export default defineEventHandler(async () => {
   return {
-    states: getAllStates(),
+    states: await getAllStates(),
   }
 })

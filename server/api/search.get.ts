@@ -1,13 +1,13 @@
 import { searchPincodes } from '../utils/db'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const q = String(query.q || '').trim()
 
-  if (!q || q.length < 2) {
+  if (!q) {
     return { results: [] }
   }
 
-  const results = searchPincodes(q, 10)
+  const results = await searchPincodes(q, 10)
   return { results }
 })

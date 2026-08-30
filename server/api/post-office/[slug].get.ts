@@ -1,12 +1,12 @@
 import { getPostOfficeDetails } from '../../utils/db'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
   if (!slug) {
     throw createError({ statusCode: 400, statusMessage: 'Post office slug is required.' })
   }
 
-  const details = getPostOfficeDetails(slug)
+  const details = await getPostOfficeDetails(slug)
   if (!details) {
     throw createError({
       statusCode: 404,

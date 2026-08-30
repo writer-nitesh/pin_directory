@@ -1,0 +1,58 @@
+{
+  "name": "Pin Directory",
+  "short_name": "Pin Directory",
+  "description": "Find postal codes, post offices, and addresses across all states and districts in India.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0284c7",
+  "categories": ["utilities", "navigation"],
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/logo.png",
+      "sizes": "1080x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pin Directory Home"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find My PIN",
+      "short_name": "Find PIN",
+      "description": "Detect your location and find PIN code",
+      "url": "/find-my-pincode",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Browse States",
+      "short_name": "States",
+      "description": "Browse all Indian states",
+      "url": "/states",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

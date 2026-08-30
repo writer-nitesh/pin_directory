@@ -10,7 +10,7 @@ useHead({
     { name: 'format-detection', content: 'telephone=no' },
   ],
   link: [
-    { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+    { rel: 'icon', type: 'image/png', href: '/favicon.png' },
   ],
 })
 
@@ -19,7 +19,7 @@ useSchemaOrg([
   defineOrganization({
     name: 'Pin Directory',
     url: config.public.siteUrl as string,
-    logo: `${config.public.siteUrl}/favicon.ico`,
+    logo: `${config.public.siteUrl}/logo-512.png`,
   }),
   defineWebSite({
     name: 'Pin Directory',
@@ -37,6 +37,7 @@ useSchemaOrg([
 
 <template>
   <div class="min-h-screen flex flex-col bg-zinc-50/50 text-zinc-900 selection:bg-sky-500 selection:text-white">
+    <NuxtPwaManifest />
     <NuxtRouteAnnouncer />
     <AppHeader />
     <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8">

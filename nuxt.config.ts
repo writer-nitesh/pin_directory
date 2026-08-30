@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxt/content",
     "nuxt-llms",
+    "@vite-pwa/nuxt",
+    "@nuxthub/core",
   ],
 
   devtools: { enabled: true },
@@ -52,8 +54,21 @@ export default defineNuxtConfig({
           content:
             "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
         },
+        { name: "theme-color", content: "#0284c7" },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+        { name: "apple-mobile-web-app-title", content: "Pin Directory" },
       ],
-      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+      link: [
+        { rel: "icon", type: "image/png", href: "/favicon.png" },
+        {
+          rel: "apple-touch-icon",
+          sizes: "180x180",
+          href: "/apple-touch-icon.png",
+        },
+        // manifest is injected by @vite-pwa/nuxt via <NuxtPwaManifest /> in app.vue
+      ],
     },
   },
 
@@ -110,10 +125,8 @@ export default defineNuxtConfig({
       type: "Organization",
       name: "Pin Directory",
       url: process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in",
-      logo: `${process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in"}/favicon.ico`,
-      sameAs: [
-        "https://en.wikipedia.org/wiki/Postal_Index_Number",
-      ],
+      logo: `${process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in"}/logo-512.png`,
+      sameAs: ["https://en.wikipedia.org/wiki/P ostal_Index_Number"],
     },
   },
 
@@ -126,11 +139,31 @@ export default defineNuxtConfig({
       { loc: "/", priority: 1.0, changefreq: "daily" },
       { loc: "/states", priority: 0.9, changefreq: "weekly" },
       { loc: "/find-my-pincode", priority: 0.9, changefreq: "monthly" },
-      { loc: "/guides/what-is-a-pincode", priority: 0.8, changefreq: "monthly" },
-      { loc: "/guides/how-india-pincodes-work", priority: 0.8, changefreq: "monthly" },
-      { loc: "/guides/pincode-format-zones", priority: 0.8, changefreq: "monthly" },
-      { loc: "/guides/find-pincode-by-address", priority: 0.8, changefreq: "monthly" },
-      { loc: "/guides/post-office-near-me", priority: 0.8, changefreq: "monthly" },
+      {
+        loc: "/guides/what-is-a-pincode",
+        priority: 0.8,
+        changefreq: "monthly",
+      },
+      {
+        loc: "/guides/how-india-pincodes-work",
+        priority: 0.8,
+        changefreq: "monthly",
+      },
+      {
+        loc: "/guides/pincode-format-zones",
+        priority: 0.8,
+        changefreq: "monthly",
+      },
+      {
+        loc: "/guides/find-pincode-by-address",
+        priority: 0.8,
+        changefreq: "monthly",
+      },
+      {
+        loc: "/guides/post-office-near-me",
+        priority: 0.8,
+        changefreq: "monthly",
+      },
     ],
   },
 
@@ -161,7 +194,8 @@ export default defineNuxtConfig({
   llms: {
     domain: process.env.NUXT_PUBLIC_SITE_URL || "https://pindirectory.in",
     title: "Pin Directory — Indian PIN Code & Postal Code Finder",
-    description: "Free Indian postal code (PIN code) directory with 19,500+ PIN codes, 165,000+ post offices, and GPS-based location detection. Browse by state, district, or city across all 37 Indian states and union territories.",
+    description:
+      "Free Indian postal code (PIN code) directory with 19,500+ PIN codes, 165,000+ post offices, and GPS-based location detection. Browse by state, district, or city across all 37 Indian states and union territories.",
     contentRawMarkdown: {
       excludeCollections: [],
       rewriteLLMSTxt: false,
@@ -182,4 +216,102 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2026-06-30",
+
+  pwa: {
+    // Enable PWA in dev mode so we can test install prompt on localhost
+    devOptions: {
+      enabled: true,
+      type: "module",
+    },
+
+    // Strategy: auto-generate service worker via Workbox
+    strategies: "generateSW",
+    registerType: "autoUpdate",
+
+    // Web App Manifest
+    manifest: {
+      name: "Pin Directory",
+      short_name: "Pin Directory",
+      description:
+        "Find postal codes, post offices, and addresses across all states and districts in India.",
+      theme_color: "#0284c7",
+      background_color: "#ffffff",
+      display: "standalone",
+      orientation: "portrait-primary",
+      scope: "/",
+      start_url: "/",
+      lang: "en-IN",
+      categories: ["utilities", "navigation"],
+      icons: [
+        {
+          src: "/icon-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: "/icon-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: "/icon-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable",
+        },
+      ],
+      shortcuts: [
+        {
+          name: "Find My PIN Code",
+          short_name: "Find PIN",
+          description: "Detect your location and find your PIN code",
+          url: "/find-my-pincode",
+          icons: [{ src: "/icon-192x192.png", sizes: "192x192" }],
+        },
+        {
+          name: "Browse States",
+          short_name: "States",
+          description: "Browse all Indian states and UTs",
+          url: "/states",
+          icons: [{ src: "/icon-192x192.png", sizes: "192x192" }],
+        },
+      ],
+    },
+
+    // Workbox config — cache pages + assets
+    workbox: {
+      globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
+      navigateFallback: "/",
+      navigateFallbackDenylist: [/^\/api\//, /\.xml$/],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "google-fonts-cache",
+            expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+          },
+        },
+      ],
+    },
+
+    // Enable install prompt interception via $pwa.showInstallPrompt
+    client: {
+      installPrompt: true,
+      periodicSyncForUpdates: 3600, // check for updates every hour
+    },
+  },
+
+  hub: {
+    database: true,
+  },
+
+  $production: {
+    hub: {
+      // Cloudflare D1 (SQLite) database in production, managed by NuxtHub.
+      database: true,
+    },
+  },
 });

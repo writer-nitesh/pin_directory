@@ -4,12 +4,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         <!-- Brand / Intro -->
         <div class="space-y-3 md:col-span-1">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-md bg-sky-600 flex items-center justify-center text-white text-xs font-bold">
-              PIN
-            </div>
-            <span class="font-bold text-zinc-900">Pin Directory</span>
-          </div>
+          <AppLogo size="lg" show-text />
           <p class="text-xs text-zinc-500 leading-relaxed">
             Fast, clean, and modern Indian postal code directory. Search 19,500+ PIN codes and 165,000+ post offices
             across India.
@@ -20,22 +15,9 @@
               <span>📍 Use GPS Location Tool</span>
             </NuxtLink>
           </div>
-          <!-- External Data Source Attribution -->
-          <div class="pt-1 space-y-1">
-            <p class="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">Data Sources</p>
-            <a href="https://www.indiapost.gov.in" target="_blank" rel="noopener noreferrer"
-              class="block text-[11px] text-zinc-500 hover:text-sky-600 transition">
-              India Post (Department of Posts)
-            </a>
-            <a href="https://data.gov.in/resource/all-india-pincode-directory-till-last-month" target="_blank"
-              rel="noopener noreferrer" class="block text-[11px] text-zinc-500 hover:text-sky-600 transition">
-              data.gov.in — Open Data Portal
-            </a>
-            <a href="https://en.wikipedia.org/wiki/Postal_Index_Number" target="_blank" rel="noopener noreferrer"
-              class="block text-[11px] text-zinc-500 hover:text-sky-600 transition">
-              Wikipedia — Postal Index Number
-            </a>
-          </div>
+          <p class="text-[11px] text-zinc-500">
+            Postal data sourced from official public records.
+          </p>
         </div>
 
         <!-- Major Cities -->

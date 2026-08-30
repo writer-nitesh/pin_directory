@@ -1,6 +1,6 @@
 import { getDistrictDetails } from '../../utils/db'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const districtSlug = getRouterParam(event, 'district')
   if (!districtSlug) {
     throw createError({
@@ -9,7 +9,7 @@ export default defineEventHandler((event) => {
     })
   }
 
-  const details = getDistrictDetails(districtSlug)
+  const details = await getDistrictDetails(districtSlug)
   if (!details) {
     throw createError({
       statusCode: 404,

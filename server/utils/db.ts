@@ -1,19 +1,5 @@
-import Database from 'better-sqlite3'
-import { resolve } from 'node:path'
-
-let dbInstance: Database.Database | null = null
-
-export function getDb(): Database.Database {
-  if (!dbInstance) {
-    const dbPath = resolve(process.cwd(), 'server/data/pincodes.db')
-    dbInstance = new Database(dbPath, {
-      readonly: true,
-      fileMustExist: true,
-    })
-    dbInstance.pragma('journal_mode = WAL')
-  }
-  return dbInstance
-}
+import { db } from '@nuxthub/db'
+import { sql } from 'drizzle-orm'
 
 export interface PostOffice {
   id: number
@@ -65,220 +51,140 @@ export interface DistrictInfo {
   office_count: number
 }
 
-export function getPincodeDetails(code: string) {
-  const db = getDb()
-  const summary = db.prepare<[string], PincodeSummary>(
-    'SELECT * FROM pincodes_summary WHERE pincode = ?'
-  ).get(code)
-
+export async function getPincodeDetails(code: string) {
+  const summary = await db.get<PincodeSummary>(sql`SELECT * FROM pincodes_summary WHERE pincode = ${code}`)
   if (!summary) return null
 
-  const offices = db.prepare<[string], PostOffice>(
-    "SELECT * FROM post_offices WHERE pincode = ? ORDER BY CASE WHEN delivery = 'Delivery' THEN 0 ELSE 1 END, officename ASC"
-  ).all(code)
+  const offices = await db.all<PostOffice>(sql`
+    SELECT * FROM post_offices WHERE pincode = ${code}
+    ORDER BY CASE WHEN delivery = 'Delivery' THEN 0 ELSE 1 END, officename ASC
+  `)
+  const nearby = await db.all<{ pincode: string }>(sql`
+    SELECT DISTINCT pincode FROM post_offices
+    WHERE district_slug = ${summary.district_slug} AND pincode != ${code}
+    LIMIT 12
+  `)
 
-  // Find nearby/sibling pincodes in same district
-  const nearby = db.prepare<[string, string], { pincode: string }>(
-    'SELECT DISTINCT pincode FROM post_offices WHERE district_slug = ? AND pincode != ? LIMIT 12'
-  ).all(summary.district_slug, code)
-
-  return {
-    summary,
-    offices,
-    nearby: nearby.map(n => n.pincode),
-  }
+  return { summary, offices, nearby: nearby.map((n) => n.pincode) }
 }
 
-export function searchPincodes(query: string, limit = 10) {
-  const db = getDb()
+export async function searchPincodes(query: string, limit = 10) {
   const cleanQ = query.trim()
   if (!cleanQ) return []
 
-  // If query is numeric, search pincode prefix
   if (/^\d+$/.test(cleanQ)) {
-    const pincodes = db.prepare<[string, number], any>(
-      `SELECT pincode, district, statename, office_count, primary_offices
-       FROM pincodes_summary
-       WHERE pincode LIKE ?
-       ORDER BY pincode ASC
-       LIMIT ?`
-    ).all(`${cleanQ}%`, limit)
-
+    const pincodes = await db.all<any>(sql`
+      SELECT pincode, district, statename, office_count, primary_offices
+      FROM pincodes_summary WHERE pincode LIKE ${cleanQ + '%'}
+      ORDER BY pincode ASC LIMIT ${limit}
+    `)
     return pincodes.map((p) => ({
       type: 'pincode',
       title: p.pincode,
       subtitle: `${p.district}, ${p.statename} • ${p.office_count} Office${p.office_count > 1 ? 's' : ''}`,
       path: `/pincode/${p.pincode}`,
-      pincode: p.pincode,
-      district: p.district,
-      statename: p.statename,
+      pincode: p.pincode, district: p.district, statename: p.statename,
     }))
   }
 
   const wildcard = `%${cleanQ}%`
   const prefix = `${cleanQ}%`
 
-  // 1. Search States
-  const states = db.prepare<[string, string], any>(
-    `SELECT state_slug, statename, district_count, pincode_count
-     FROM states
-     WHERE statename LIKE ?
-     ORDER BY CASE WHEN statename LIKE ? THEN 1 ELSE 2 END, statename ASC
-     LIMIT 3`
-  ).all(wildcard, prefix)
-
+  const states = await db.all<any>(sql`
+    SELECT state_slug, statename, district_count, pincode_count FROM states
+    WHERE statename LIKE ${wildcard}
+    ORDER BY CASE WHEN statename LIKE ${prefix} THEN 1 ELSE 2 END, statename ASC LIMIT 3
+  `)
   const stateResults = states.map((s) => ({
-    type: 'state',
-    title: s.statename,
+    type: 'state', title: s.statename,
     subtitle: `State • ${s.district_count} Districts, ${s.pincode_count} PIN Codes`,
-    path: `/state/${s.state_slug}/pincodes`,
-    statename: s.statename,
-    slug: s.state_slug,
+    path: `/state/${s.state_slug}/pincodes`, statename: s.statename, slug: s.state_slug,
   }))
 
-  // 2. Search Districts
-  const districts = db.prepare<[string, string], any>(
-    `SELECT district_slug, district, statename, state_slug, pincode_count
-     FROM districts
-     WHERE district LIKE ?
-     ORDER BY CASE WHEN district LIKE ? THEN 1 ELSE 2 END, district ASC
-     LIMIT 4`
-  ).all(wildcard, prefix)
-
+  const districts = await db.all<any>(sql`
+    SELECT district_slug, district, statename, state_slug, pincode_count FROM districts
+    WHERE district LIKE ${wildcard}
+    ORDER BY CASE WHEN district LIKE ${prefix} THEN 1 ELSE 2 END, district ASC LIMIT 4
+  `)
   const districtResults = districts.map((d) => ({
-    type: 'district',
-    title: d.district,
+    type: 'district', title: d.district,
     subtitle: `District in ${d.statename} • ${d.pincode_count} PIN Codes`,
-    path: `/district/${d.district_slug}/pincodes`,
-    district: d.district,
-    statename: d.statename,
-    slug: d.district_slug,
+    path: `/district/${d.district_slug}/pincodes`, district: d.district, statename: d.statename, slug: d.district_slug,
   }))
 
-  // 3. Search Post Offices & Area Names
   const remainingLimit = Math.max(limit - stateResults.length - districtResults.length, 5)
-  const offices = db.prepare<[string, string, string, number], any>(
-    `SELECT DISTINCT pincode, officename, office_slug, district, statename, officetype, delivery
-     FROM post_offices
-     WHERE officename LIKE ? OR district LIKE ?
-     ORDER BY CASE WHEN officename LIKE ? THEN 1 ELSE 2 END, officename ASC
-     LIMIT ?`
-  ).all(wildcard, wildcard, prefix, remainingLimit)
-
+  const offices = await db.all<any>(sql`
+    SELECT DISTINCT pincode, officename, office_slug, district, statename, officetype, delivery
+    FROM post_offices WHERE officename LIKE ${wildcard} OR district LIKE ${wildcard}
+    ORDER BY CASE WHEN officename LIKE ${prefix} THEN 1 ELSE 2 END, officename ASC LIMIT ${remainingLimit}
+  `)
   const officeResults = offices.map((o) => ({
-    type: 'office',
-    title: o.officename,
+    type: 'office', title: o.officename,
     subtitle: `${o.pincode} • ${o.district}, ${o.statename}`,
     path: `/pincode/${o.pincode}`,
-    officename: o.officename,
-    office_slug: o.office_slug,
-    pincode: o.pincode,
-    district: o.district,
-    statename: o.statename,
-    delivery: o.delivery,
-    officetype: o.officetype,
+    officename: o.officename, office_slug: o.office_slug, pincode: o.pincode,
+    district: o.district, statename: o.statename, delivery: o.delivery, officetype: o.officetype,
   }))
 
   return [...stateResults, ...districtResults, ...officeResults]
 }
 
-export function getAllStates() {
-  const db = getDb()
-  return db.prepare<[], StateInfo>(
-    'SELECT * FROM states ORDER BY statename ASC'
-  ).all()
+export async function getAllStates() {
+  return db.all<StateInfo>(sql`SELECT * FROM states ORDER BY statename ASC`)
 }
 
-export function getStateDetails(stateSlug: string) {
-  const db = getDb()
-  const state = db.prepare<[string], StateInfo>(
-    'SELECT * FROM states WHERE state_slug = ?'
-  ).get(stateSlug)
-
+export async function getStateDetails(stateSlug: string) {
+  const state = await db.get<StateInfo>(sql`SELECT * FROM states WHERE state_slug = ${stateSlug}`)
   if (!state) return null
 
-  const districts = db.prepare<[string], DistrictInfo>(
-    'SELECT * FROM districts WHERE state_slug = ? ORDER BY district ASC'
-  ).all(stateSlug)
+  const districts = await db.all<DistrictInfo>(sql`SELECT * FROM districts WHERE state_slug = ${stateSlug} ORDER BY district ASC`)
+  const topPincodes = await db.all<{ pincode: string; district: string }>(sql`SELECT pincode, district FROM pincodes_summary WHERE state_slug = ${stateSlug} LIMIT 24`)
 
-  const topPincodes = db.prepare<[string], { pincode: string; district: string }>(
-    'SELECT pincode, district FROM pincodes_summary WHERE state_slug = ? LIMIT 24'
-  ).all(stateSlug)
-
-  return {
-    state,
-    districts,
-    topPincodes,
-  }
+  return { state, districts, topPincodes }
 }
 
-export function getDistrictDetails(districtSlug: string) {
-  const db = getDb()
-  const district = db.prepare<[string], DistrictInfo>(
-    'SELECT * FROM districts WHERE district_slug = ?'
-  ).get(districtSlug)
-
+export async function getDistrictDetails(districtSlug: string) {
+  const district = await db.get<DistrictInfo>(sql`SELECT * FROM districts WHERE district_slug = ${districtSlug}`)
   if (!district) return null
 
-  const pincodes = db.prepare<[string], PincodeSummary>(
-    'SELECT * FROM pincodes_summary WHERE district_slug = ? ORDER BY pincode ASC'
-  ).all(districtSlug)
+  const pincodes = await db.all<PincodeSummary>(sql`SELECT * FROM pincodes_summary WHERE district_slug = ${districtSlug} ORDER BY pincode ASC`)
+  const offices = await db.all<PostOffice>(sql`SELECT * FROM post_offices WHERE district_slug = ${districtSlug} ORDER BY officename ASC`)
 
-  const offices = db.prepare<[string], PostOffice>(
-    'SELECT * FROM post_offices WHERE district_slug = ? ORDER BY officename ASC'
-  ).all(districtSlug)
-
-  return {
-    district,
-    pincodes,
-    offices,
-  }
+  return { district, pincodes, offices }
 }
 
-export function getPostOfficeDetails(officeSlug: string) {
-  const db = getDb()
-  const office = db.prepare<[string], PostOffice>(
-    'SELECT * FROM post_offices WHERE office_slug = ? LIMIT 1'
-  ).get(officeSlug)
-
+export async function getPostOfficeDetails(officeSlug: string) {
+  const office = await db.get<PostOffice>(sql`SELECT * FROM post_offices WHERE office_slug = ${officeSlug} LIMIT 1`)
   if (!office) return null
 
-  const siblingOffices = db.prepare<[string, string], PostOffice>(
-    'SELECT * FROM post_offices WHERE pincode = ? AND office_slug != ? LIMIT 10'
-  ).all(office.pincode, officeSlug)
-
-  return {
-    office,
-    siblingOffices,
-  }
+  const siblingOffices = await db.all<PostOffice>(sql`
+    SELECT * FROM post_offices WHERE pincode = ${office.pincode} AND office_slug != ${officeSlug} LIMIT 10
+  `)
+  return { office, siblingOffices }
 }
 
-export function getClosestPincode(lat: number, lng: number) {
-  const db = getDb()
-  // Select pincodes with coordinates within +/- 0.5 degrees bounding box, then sort by haversine distance
-  const candidates = db.prepare<[number, number, number, number], any>(
-    `SELECT pincode, district, statename, latitude, longitude
-     FROM pincodes_summary
-     WHERE latitude IS NOT NULL
-       AND longitude IS NOT NULL
-       AND latitude BETWEEN ? AND ?
-       AND longitude BETWEEN ? AND ?
-     LIMIT 50`
-  ).all(lat - 0.5, lat + 0.5, lng - 0.5, lng + 0.5)
+export async function getClosestPincode(lat: number, lng: number) {
+  type Candidate = { pincode: string; district: string; statename: string; latitude: number; longitude: number }
+
+  let candidates = await db.all<Candidate>(sql`
+    SELECT pincode, district, statename, latitude, longitude
+    FROM pincodes_summary
+    WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+      AND latitude BETWEEN ${lat - 0.5} AND ${lat + 0.5}
+      AND longitude BETWEEN ${lng - 0.5} AND ${lng + 0.5}
+    LIMIT 50
+  `)
 
   if (candidates.length === 0) {
-    // Fallback: wider bounding box
-    const wider = db.prepare<[number, number, number, number], any>(
-      `SELECT pincode, district, statename, latitude, longitude
-       FROM pincodes_summary
-       WHERE latitude IS NOT NULL
-         AND longitude IS NOT NULL
-         AND latitude BETWEEN ? AND ?
-         AND longitude BETWEEN ? AND ?
-       LIMIT 50`
-    ).all(lat - 2.0, lat + 2.0, lng - 2.0, lng + 2.0)
-    if (wider.length === 0) return null
-    return calculateNearest(wider, lat, lng)
+    candidates = await db.all<Candidate>(sql`
+      SELECT pincode, district, statename, latitude, longitude
+      FROM pincodes_summary
+      WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+        AND latitude BETWEEN ${lat - 2.0} AND ${lat + 2.0}
+        AND longitude BETWEEN ${lng - 2.0} AND ${lng + 2.0}
+      LIMIT 50
+    `)
+    if (candidates.length === 0) return null
   }
 
   return calculateNearest(candidates, lat, lng)
@@ -287,28 +193,22 @@ export function getClosestPincode(lat: number, lng: number) {
 function calculateNearest(list: any[], userLat: number, userLng: number) {
   let closest = null
   let minDistance = Infinity
-
   for (const item of list) {
-    const d = getDistanceFromLatLonInKm(userLat, userLng, item.latitude, item.longitude)
+    const d = getDistanceKm(userLat, userLng, Number(item.latitude), Number(item.longitude))
     if (d < minDistance) {
       minDistance = d
       closest = { ...item, distanceKm: Math.round(d * 10) / 10 }
     }
   }
-
   return closest
 }
 
-function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371 // Radius of the earth in km
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371
   const dLat = deg2rad(lat2 - lat1)
   const dLon = deg2rad(lon2 - lon1)
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
 function deg2rad(deg: number) {
