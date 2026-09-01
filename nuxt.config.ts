@@ -305,13 +305,6 @@ export default defineNuxtConfig({
   },
 
   hub: {
-    database: true,
-  },
-
-  $production: {
-    hub: {
-      // Cloudflare D1 (SQLite) database in production, managed by NuxtHub.
-      database: true,
-    },
+    db: 'sqlite',
   },
 });
